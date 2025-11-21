@@ -3,9 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Discord Webhook 嵌入式發送面板</title>
+    <title>Discord Webhook JSON 發送器</title>
     <style>
-        /* 基本樣式和字體 */
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background-color: #f0f2f5;
@@ -14,18 +13,16 @@
             align-items: center;
             min-height: 100vh;
             margin: 0;
+            padding: 20px 0;
         }
-
-        /* 容器和卡片樣式 */
         .container {
             background-color: #ffffff;
             padding: 40px;
             border-radius: 12px;
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
             width: 100%;
-            max-width: 500px;
+            max-width: 700px;
         }
-
         h2 {
             color: #4f545c;
             text-align: center;
@@ -33,19 +30,15 @@
             border-bottom: 2px solid #7289DA;
             padding-bottom: 10px;
         }
-
-        /* 表單欄位樣式 */
         .input-group {
             margin-bottom: 20px;
         }
-
         label {
             display: block;
             margin-bottom: 8px;
             font-weight: bold;
-            color: #5865f2; /* Discord 藍色 */
+            color: #5865f2;
         }
-
         input[type="text"], textarea {
             width: 100%;
             padding: 12px;
@@ -53,41 +46,30 @@
             border-radius: 8px;
             box-sizing: border-box;
             font-size: 16px;
-            transition: border-color 0.3s;
         }
-
-        input[type="text"]:focus, textarea:focus {
-            border-color: #5865f2;
-            outline: none;
-        }
-
         textarea {
             resize: vertical;
-            min-height: 100px;
+            min-height: 80px;
         }
-
-        /* 按鈕樣式 */
+        .sub-group {
+            background-color: #f9f9fb;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 10px;
+            border-left: 3px solid #7289DA;
+        }
         #sendButton {
             width: 100%;
             padding: 15px;
-            background-color: #5865f2; /* Discord 藍色 */
+            background-color: #5865f2;
             color: white;
             border: none;
             border-radius: 8px;
             font-size: 18px;
             cursor: pointer;
-            transition: background-color 0.3s, transform 0.1s;
+            transition: background-color 0.3s;
+            margin-top: 20px;
         }
-
-        #sendButton:hover {
-            background-color: #4752c4;
-        }
-
-        #sendButton:active {
-            transform: translateY(1px);
-        }
-        
-        /* 狀態訊息樣式 */
         #statusMessage { 
             margin-top: 25px; 
             padding: 10px;
@@ -99,19 +81,54 @@
 </head>
 <body>
     <div class="container">
-        <h2>DISCORD Webhook 嵌入式發送器</h2>
+        <h2>DISCORD 全功能 Webhook 發送器</h2>
         
         <div class="input-group">
-            <label for="embedTitle">嵌入訊息標題：</label>
-            <input type="text" id="embedTitle" placeholder="例如：新訂單通知 / 用戶回報">
+            <label for="webhookUrl">**🎯 Discord Webhook URL (必須):**</label>
+            <input type="text" id="webhookUrl" placeholder="請貼上您 Discord 伺服器中的 Webhook URL">
         </div>
 
         <div class="input-group">
-            <label for="messageContent">訊息內容 (Description)：</label>
-            <textarea id="messageContent" placeholder="輸入要發送到 Discord 的主要內容..."></textarea>
+            <label for="embedTitle">**📝 訊息主標題 (Embed Title):**</label>
+            <input type="text" id="embedTitle" placeholder="例如：新訂單通知 / 緊急警告">
         </div>
 
-        <button id="sendButton">發送嵌入式訊息到 Discord</button>
+        <div class="input-group">
+            <label for="messageContent">**📄 訊息主內容 (Description):**</label>
+            <textarea id="messageContent" placeholder="輸入要發送到 Discord 的主要內容... (支援 Markdown)"></textarea>
+        </div>
+
+        <div class="input-group">
+            <label for="embedColor">**🎨 側邊欄顏色 (Hex 碼):**</label>
+            <input type="text" id="embedColor" placeholder="請輸入 6 位十六進位顏色碼 (例如：00FF00)" maxlength="6">
+        </div>
+        
+        <div class="input-group">
+            <label>**👤 作者 (Author) - 選填:**</label>
+            <div class="sub-group">
+                <label for="authorName">作者名稱:</label>
+                <input type="text" id="authorName" placeholder="例如：系統管理員">
+                <label for="authorIconUrl">作者圖標 URL:</label>
+                <input type="text" id="authorIconUrl" placeholder="http:// 或 https:// 開頭的圖片連結">
+            </div>
+        </div>
+        
+        <div class="input-group">
+            <label>**🦶 底部資訊 (Footer) - 選填:**</label>
+            <div class="sub-group">
+                <label for="footerText">底部文字:</label>
+                <input type="text" id="footerText" placeholder="例如：系統紀錄 | 2025/11/21">
+                <label for="footerIconUrl">底部圖標 URL:</label>
+                <input type="text" id="footerIconUrl" placeholder="http:// 或 https:// 開頭的圖片連結">
+            </div>
+        </div>
+        
+        <div class="input-group">
+            <label for="jsonPreview">**📦 Webhook JSON 預覽 (自動產生):**</label>
+            <textarea id="jsonPreview" rows="5" readonly style="background-color: #eee; font-family: monospace;"></textarea>
+        </div>
+
+        <button id="sendButton">🚀 發送 Webhook 訊息</button>
         
         <p id="statusMessage"></p>
     </div>
