@@ -1,4 +1,4 @@
-// ❗❗❗ 已替換為您的 FiveM 伺服器 IP 和端口 ❗❗❗
+// 伺服器 IP 和端口
 const SERVER_IP_PORT = '31.214.143.251:11000'; 
 
 // 構造 API 端點
@@ -8,13 +8,6 @@ const PLAYERS_API_URL = `http://${SERVER_IP_PORT}/players.json`;
 const statusDisplay = document.getElementById('server-status-display');
 
 async function checkServerStatus() {
-    // 檢查是否已設定 IP，如果沒有則顯示警告
-    if (SERVER_IP_PORT.includes('【請輸入您的伺服器 IP:端口】')) {
-        statusDisplay.className = 'status-box status-offline';
-        statusDisplay.innerHTML = '🔴 **錯誤：** 請在 status.js 中設定您的伺服器 IP 和端口！';
-        return;
-    }
-    
     try {
         // 1. 獲取玩家列表和人數
         const playersResponse = await fetch(PLAYERS_API_URL);
@@ -25,11 +18,10 @@ async function checkServerStatus() {
         const infoResponse = await fetch(INFO_API_URL);
         const infoData = await infoResponse.json();
         
-        // 嘗試從 info.json 獲取最大人數
         const maxPlayers = infoData.vars.sv_maxClients || '未知';
 
         // 成功連線，更新狀態顯示
-        statusDisplay.className = 'status-box status-online';
+        statusDisplay.className = 'status-box rounded-3 status-online'; // 添加 rounded-3 讓它更圓滑
         statusDisplay.innerHTML = `
             狀態：🟢 **線上運行中** (ONLINE)<br>
             玩家人數：**${playerCount} / ${maxPlayers}**
@@ -38,7 +30,7 @@ async function checkServerStatus() {
     } catch (error) {
         // 連線失敗（可能是伺服器離線或 CORS 錯誤）
         console.error('Failed to fetch server status. Check CORS settings on FiveM server.', error);
-        statusDisplay.className = 'status-box status-offline';
+        statusDisplay.className = 'status-box rounded-3 status-offline';
         statusDisplay.innerHTML = `
             狀態：🔴 **伺服器離線或無法連線** (OFFLINE)<br>
             請確認您的伺服器已開啟，並檢查 FiveM 的 CORS 設定。
