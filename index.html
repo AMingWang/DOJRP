@@ -3,35 +3,118 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Discord Webhook 嵌入式發送器</title>
+    <title>Discord Webhook 嵌入式發送面板</title>
     <style>
-        body { font-family: Arial, sans-serif; padding: 20px; }
-        #messageInput { 
-            width: 80%; 
-            padding: 10px; 
-            margin-bottom: 10px; 
-            box-sizing: border-box; 
-            border: 1px solid #ccc;
+        /* 基本樣式和字體 */
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f0f2f5;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
         }
-        #sendButton { 
-            padding: 10px 20px; 
-            cursor: pointer; 
-            background-color: #7289DA; 
-            color: white; 
-            border: none; 
-            border-radius: 5px;
+
+        /* 容器和卡片樣式 */
+        .container {
+            background-color: #ffffff;
+            padding: 40px;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 500px;
         }
+
+        h2 {
+            color: #4f545c;
+            text-align: center;
+            margin-bottom: 30px;
+            border-bottom: 2px solid #7289DA;
+            padding-bottom: 10px;
+        }
+
+        /* 表單欄位樣式 */
+        .input-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+            color: #5865f2; /* Discord 藍色 */
+        }
+
+        input[type="text"], textarea {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #dcddde;
+            border-radius: 8px;
+            box-sizing: border-box;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+
+        input[type="text"]:focus, textarea:focus {
+            border-color: #5865f2;
+            outline: none;
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        /* 按鈕樣式 */
+        #sendButton {
+            width: 100%;
+            padding: 15px;
+            background-color: #5865f2; /* Discord 藍色 */
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 18px;
+            cursor: pointer;
+            transition: background-color 0.3s, transform 0.1s;
+        }
+
+        #sendButton:hover {
+            background-color: #4752c4;
+        }
+
+        #sendButton:active {
+            transform: translateY(1px);
+        }
+        
+        /* 狀態訊息樣式 */
         #statusMessage { 
-            margin-top: 15px; 
+            margin-top: 25px; 
+            padding: 10px;
+            border-radius: 6px;
+            text-align: center;
             font-weight: bold;
         }
     </style>
 </head>
 <body>
-    <h2>Discord Webhook 訊息發送 (嵌入式)</h2>
-    <input type="text" id="messageInput" placeholder="輸入你要發送到 Discord 的訊息內容">
-    <button id="sendButton">發送嵌入式訊息</button>
-    <p id="statusMessage"></p>
+    <div class="container">
+        <h2>DISCORD Webhook 嵌入式發送器</h2>
+        
+        <div class="input-group">
+            <label for="embedTitle">嵌入訊息標題：</label>
+            <input type="text" id="embedTitle" placeholder="例如：新訂單通知 / 用戶回報">
+        </div>
+
+        <div class="input-group">
+            <label for="messageContent">訊息內容 (Description)：</label>
+            <textarea id="messageContent" placeholder="輸入要發送到 Discord 的主要內容..."></textarea>
+        </div>
+
+        <button id="sendButton">發送嵌入式訊息到 Discord</button>
+        
+        <p id="statusMessage"></p>
+    </div>
 
     <script src="script.js"></script>
 </body>
