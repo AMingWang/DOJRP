@@ -3,119 +3,174 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>【您的伺服器名稱】官方網站</title>
+    <title>【[您的伺服器名稱]】官方網站</title>
+    
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" 
+          rel="stylesheet" 
+          integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" 
+          crossorigin="anonymous">
     
     <style>
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            margin: 0;
-            padding: 0;
-            background-color: #f0f2f5;
-            color: #333;
-            text-align: center;
+            background-color: #f0f2f5; 
         }
         .header {
-            background-color: #007bff; /* 伺服器藍色調 */
+            background-color: #0d6efd; /* Bootstrap Primary Blue */
             color: white;
-            padding: 25px 0;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-        }
-        .container {
-            padding: 20px;
-            max-width: 800px;
-            margin: 20px auto;
-            background-color: white;
-            border-radius: 10px;
-            box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
-        }
-        h2 {
-            color: #007bff;
-            border-bottom: 2px solid #f0f2f5;
-            padding-bottom: 10px;
-            margin-top: 0;
+            padding: 40px 0;
+            margin-bottom: 20px;
+            /* 伺服器主題視覺效果 */
+            background-image: linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.5)), url('https://picsum.photos/1200/400?random=1'); /* 替換成您的伺服器圖片 */
+            background-size: cover;
+            background-position: center;
         }
         .status-box {
-            margin: 20px 0;
-            padding: 20px;
-            border-radius: 8px;
-            font-size: 1.3em;
-            font-weight: bold;
-            transition: all 0.3s ease;
+            padding: 25px; 
+            font-size: 1.4em;
         }
-        /* 伺服器狀態：線上 */
         .status-online {
-            background-color: #e6ffe6;
-            color: #28a745; /* 綠色 */
-            border: 2px solid #28a745;
+            background-color: #d1e7dd; /* 淺綠色 */
+            color: #0f5132; /* 深綠色文字 */
+            border: 1px solid #0f5132;
         }
-        /* 伺服器狀態：離線 */
         .status-offline {
-            background-color: #ffe6e6;
-            color: #dc3545; /* 紅色 */
-            border: 2px solid #dc3545;
+            background-color: #f8d7da; /* 淺紅色 */
+            color: #842029; /* 深紅色文字 */
+            border: 1px solid #842029;
         }
         .ip-address {
+            background-color: #e9ecef; 
+            padding: 15px;
             font-size: 1.6em;
-            color: #343a40;
-            margin: 15px 0;
-            padding: 10px;
-            background-color: #e9ecef;
-            border-radius: 5px;
             cursor: pointer;
+            font-weight: bold;
+            transition: all 0.2s;
         }
         .ip-address:hover {
             background-color: #dee2e6;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
         }
     </style>
 </head>
 <body>
 
-    <div class="header">
-        <h1>【您的伺服器名稱】</h1>
-        <p>我們是一個友善的 Roleplay 社群！</p>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+      <div class="container">
+        <a class="navbar-brand" href="index.html">【[您的伺服器簡稱]】</a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+          <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+          <ul class="navbar-nav ms-auto">
+            <li class="nav-item">
+              <a class="nav-link active" aria-current="page" href="#">首頁</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="#">伺服器規則</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="#">加入Discord</a>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </nav>
+    
+    <div class="header text-center shadow-sm">
+        <h1 class="display-3 fw-bold">【[您的伺服器名稱]】</h1>
+        <p class="lead">歡迎來到我們的專屬社群，這裡是即時資訊中心！</p>
     </div>
 
-    <div class="container">
-        <h2>即時伺服器狀態</h2>
+    <div class="container my-5">
         
-        <div class="status-box" id="server-status-display">
-            正在載入中... 請稍候
+        <div class="card shadow-lg mb-5 border-0">
+            <div class="card-body">
+                <h2 class="card-title text-primary mb-4">即時伺服器狀態</h2>
+                
+                <div class="status-box rounded-3" id="server-status-display">
+                    正在載入中... 請稍候
+                </div>
+                
+                <h3 class="mt-4">連線資訊</h3>
+                <p class="text-muted">點擊 IP 地址即可複製，並貼入 FiveM 客戶端</p>
+                
+                <div class="ip-address rounded" id="server-ip">
+                    [請填寫您的連線網址或 IP]
+                </div>
+                
+                <a href="[您的 Discord 邀請連結]" target="_blank" class="btn btn-success btn-lg mt-4 shadow-sm">
+                    🎉 點此加入我們的 Discord 社群 🎉
+                </a>
+            </div>
         </div>
         
-        <h3>連線資訊</h3>
-        <p>點擊 IP 地址即可複製</p>
-        <div class="ip-address" id="server-ip">
-            play.yourserver.com (點此修改並複製)
+        <div class="card shadow-sm border-0 mb-5">
+            <div class="card-body text-center">
+                <h2 class="text-secondary border-bottom pb-2 mb-4">核心管理團隊 (Staff)</h2>
+                <div class="row justify-content-center">
+                    <div class="col-lg-3 col-md-6 mb-3">
+                        <div class="card p-3 border-success h-100">
+                            <h5 class="card-title text-success">Admin Name 1 (Owner)</h5>
+                            <p class="card-text text-muted">負責伺服器核心運營與 txAdmin 維護。</p>
+                            <a href="#" class="btn btn-sm btn-outline-success mt-auto">Discord 私訊</a>
+                        </div>
+                    </div>
+                    <div class="col-lg-3 col-md-6 mb-3">
+                        <div class="card p-3 h-100">
+                            <h5 class="card-title text-primary">Admin Name 2 (Admin)</h5>
+                            <p class="card-text text-muted">負責處理社群事務與玩家申訴。</p>
+                            <a href="#" class="btn btn-sm btn-outline-primary mt-auto">Discord 私訊</a>
+                        </div>
+                    </div>
+                    <div class="col-lg-3 col-md-6 mb-3">
+                        <div class="card p-3 border-secondary h-100">
+                            <h5 class="card-title text-secondary">Admin Name 3 (Mod)</h5>
+                            <p class="card-text text-muted">負責遊戲內巡邏與規則執行。</p>
+                            <a href="#" class="btn btn-sm btn-outline-secondary mt-auto">Discord 私訊</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
-        
-        <p>
-            <a href="【您的 Discord 連結】" target="_blank" style="color: #007bff; text-decoration: underline; font-weight: bold;">
-                👉 點此加入我們的 Discord 社群 👈
-            </a>
-        </p>
+
+        <div class="card shadow-sm border-0">
+            <div class="card-body text-start">
+                <h2 class="text-secondary border-bottom pb-2 mb-4">最新公告</h2>
+                
+                <div class="alert alert-info" role="alert">
+                    <strong>[2025/11/21]</strong> 網站已上線！歡迎大家提供建議。
+                </div>
+                <div class="alert alert-warning" role="alert">
+                    <strong>[2025/11/15]</strong> 伺服器已完成 v1.2.0 大更新，請大家重新連接。
+                </div>
+            </div>
+        </div>
+
     </div>
 
-    <div class="container">
-        <h2>最新公告</h2>
-        <p>
-            [2025/11/21] 網站已上線！歡迎大家提供建議。
-        </p>
-        <p>
-            [2025/11/15] 伺服器已完成 v1.2.0 大更新，修復多項 Bug 並新增了經濟系統。
-        </p>
-    </div>
+    <footer class="bg-dark text-white text-center py-3 mt-5">
+        <div class="container">
+            <p class="mb-0">&copy; 2025 【[您的伺服器名稱]】. All Rights Reserved.</p>
+            <p class="mb-0 small">Powered by GitHub Pages & FiveM API.</p>
+        </div>
+    </footer>
+
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" 
+            integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" 
+            crossorigin="anonymous"></script>
 
     <script src="status.js"></script>
     
     <script>
         document.getElementById('server-ip').onclick = function() {
-            // 獲取 IP 地址的文本內容，並去除前後空白
             const ip = this.textContent.trim();
             navigator.clipboard.writeText(ip)
                 .then(() => {
                     // 複製成功後，短暫顯示提示
                     const originalText = this.innerHTML;
-                    this.innerHTML = '已複製！' + ip;
+                    this.innerHTML = '✅ 已複製！ ' + ip;
                     setTimeout(() => {
                         this.innerHTML = originalText;
                     }, 1500);
@@ -125,6 +180,5 @@
                 });
         };
     </script>
-
 </body>
 </html>
