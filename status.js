@@ -21,7 +21,7 @@ async function checkServerStatus() {
         const maxPlayers = infoData.vars.sv_maxClients || '未知';
 
         // 成功連線，更新狀態顯示
-        statusDisplay.className = 'status-box rounded-3 status-online'; // 添加 rounded-3 讓它更圓滑
+        statusDisplay.className = 'status-box rounded-3 status-online';
         statusDisplay.innerHTML = `
             狀態：🟢 **線上運行中** (ONLINE)<br>
             玩家人數：**${playerCount} / ${maxPlayers}**
