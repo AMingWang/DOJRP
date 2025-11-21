@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Discord Webhook JSON 發送器</title>
     <style>
+        /* CSS 樣式 (已包含在內) */
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background-color: #f0f2f5;
@@ -58,6 +59,54 @@
             margin-top: 10px;
             border-left: 3px solid #7289DA;
         }
+        .field-group {
+            border: 1px dashed #7289DA;
+            padding: 15px;
+            margin-bottom: 10px;
+            border-radius: 6px;
+        }
+        .field-row {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+        .field-row input {
+            flex-grow: 1;
+        }
+        .field-row label {
+            width: 100px;
+            margin-bottom: 0;
+            display: flex;
+            align-items: center;
+            font-weight: normal;
+        }
+        .field-row .checkbox-group {
+            display: flex;
+            align-items: center;
+        }
+        .remove-field {
+            background-color: #ff5555;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            cursor: pointer;
+            border-radius: 4px;
+            transition: background-color 0.2s;
+        }
+        .remove-field:hover {
+            background-color: #cc0000;
+        }
+        #addFieldButton {
+            background-color: #2ecc71;
+            color: white;
+            border: none;
+            padding: 10px;
+            border-radius: 8px;
+            cursor: pointer;
+            margin-bottom: 15px;
+            display: block;
+            width: 100%;
+        }
         #sendButton {
             width: 100%;
             padding: 15px;
@@ -99,8 +148,18 @@
         </div>
 
         <div class="input-group">
-            <label for="embedColor">**🎨 側邊欄顏色 (Hex 碼):**</label>
-            <input type="text" id="embedColor" placeholder="請輸入 6 位十六進位顏色碼 (例如：00FF00)" maxlength="6">
+            <label for="embedColorHex">**🎨 側邊欄顏色 (選擇器):**</label>
+            <div style="display: flex; align-items: center; gap: 10px;">
+                <input type="color" id="embedColorPicker" value="#5865F2" style="width: 60px; height: 40px; border-radius: 8px; border: none;">
+                <input type="text" id="embedColorHex" placeholder="Hex 碼 (自動更新)" readonly style="flex-grow: 1; background-color: #eee;">
+            </div>
+        </div>
+        
+        <div class="input-group">
+            <label>**📋 嵌入訊息欄位 (Fields) - 選填:**</label>
+            <button id="addFieldButton" type="button"> [+] 新增一個欄位</button>
+            <div id="fieldsContainer">
+                </div>
         </div>
         
         <div class="input-group">
