@@ -3,43 +3,53 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>VATSIM 即時飛行追蹤器</title>
+    <title>VATSIM Live Radar Pro</title>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <style>
-        body { margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
-        #map { height: 100vh; width: 100%; background: #0b1a2d; } /* 深色背景符合雷達感 */
+        body { margin: 0; padding: 0; font-family: 'Segoe UI', Arial, sans-serif; background: #1a1a1a; color: white; }
+        #map { height: 100vh; width: 100%; }
         
-        /* 左上角資訊面板 */
-        .info-panel {
+        /* 側邊資訊面板 */
+        .side-panel {
             position: absolute; top: 10px; left: 10px; z-index: 1000;
-            background: rgba(255, 255, 255, 0.9); padding: 15px; border-radius: 8px;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.3); width: 220px;
+            background: rgba(30, 39, 46, 0.95); width: 280px; max-height: 90vh;
+            border-radius: 12px; box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+            display: flex; flex-direction: column; border: 1px solid #444;
         }
 
-        /* 搜尋框樣式 */
-        #search-box {
-            width: 100%; padding: 8px; margin-top: 10px; border: 1px solid #ccc;
-            border-radius: 4px; box-sizing: border-box;
+        .panel-header { padding: 15px; border-bottom: 1px solid #444; }
+        .search-input { 
+            width: 100%; padding: 8px; border-radius: 5px; border: none; 
+            background: #2f3542; color: white; box-sizing: border-box; margin-top: 10px;
         }
 
-        /* 飛機圖標 CSS 旋轉邏輯 */
-        .plane-icon {
-            background: none;
-            border: none;
+        .list-container { flex: 1; overflow-y: auto; padding: 10px; }
+        .atc-item { 
+            background: #2f3542; margin-bottom: 5px; padding: 8px; 
+            border-radius: 4px; border-left: 4px solid #2ecc71; font-size: 0.85em;
         }
-        .plane-img {
-            transition: transform 0.5s ease; /* 讓轉向更平滑 */
-            filter: drop-shadow(0px 0px 2px rgba(0,0,0,0.5));
+
+        /* 彈窗樣式 */
+        .leaflet-popup-content-wrapper { background: #1e272e; color: white; border-radius: 8px; }
+        .metar-btn { 
+            display: inline-block; background: #3498db; color: white; 
+            padding: 2px 6px; border-radius: 4px; cursor: pointer; font-size: 0.8em; margin: 2px;
         }
+        
+        .plane-img { transition: transform 0.3s linear; }
     </style>
 </head>
 <body>
 
-    <div class="info-panel">
-        <b style="font-size: 1.2em;">VATSIM Tracker</b><br>
-        在線飛機: <span id="count" style="color: #d35400; font-weight: bold;">載入中...</span><br>
-        <input type="text" id="search-box" placeholder="搜尋呼號 (e.g. EVA)" oninput="filterPlanes()">
-        <p style="font-size: 0.8em; color: #666; margin-bottom: 0;">點擊飛機查看詳細航路</p>
+    <div class="side-panel">
+        <div class="panel-header">
+            <b style="font-size: 1.2em; color: #f39c12;">VATSIM Radar Pro</b><br>
+            <small>在線飛機: <span id="count">0</span> | 管制: <span id="atc-count">0</span></small>
+            <input type="text" id="search-box" class="search-input" placeholder="搜尋呼號 (如: EVA, CAL)" oninput="filterData()">
+        </div>
+        <div id="atc-list" class="list-container">
+            <p style="text-align: center; color: #888;">正在獲取管制員資料...</p>
+        </div>
     </div>
 
     <div id="map"></div>
@@ -47,80 +57,103 @@
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script>
         // 1. 初始化地圖
-        const map = L.map('map', {
-            zoomControl: false // 隱藏預設按鈕，畫面更乾淨
-        }).setView([23.5, 121], 5);
-
-        // 使用 CartoDB 的深色地圖底圖，讓飛機更明顯
+        const map = L.map('map', { zoomControl: false }).setView([23.5, 121], 5);
         L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
-            attribution: '&copy; OpenStreetMap &copy; CARTO'
+            attribution: '&copy; CARTO'
         }).addTo(map);
 
         let planeLayer = L.layerGroup().addTo(map);
-        let allPilots = []; // 儲存所有資料用於過濾
+        let allPilots = [];
+        let allControllers = [];
 
-        // 2. 飛機圖示的 SVG (也可以換成圖片網址)
-        const planeSvg = `
-            <svg viewBox="0 0 512 512" width="20" height="20" xmlns="http://www.w3.org/2000/svg">
-                <path fill="#f39c12" d="M448 336v-40L288 192V79.2c0-22.1-17.9-40-40-40s-40 17.9-40 40V192L48 296v40l160-48v113.6l-48 31.2V472l88-24 88 24v-41.2l-48-31.2V288l160 48z"/>
-            </svg>`;
+        const planeSvg = `<svg viewBox="0 0 512 512" width="22" height="22" xmlns="http://www.w3.org/2000/svg"><path fill="#f39c12" d="M448 336v-40L288 192V79.2c0-22.1-17.9-40-40-40s-40 17.9-40 40V192L48 296v40l160-48v113.6l-48 31.2V472l88-24 88 24v-41.2l-48-31.2V288l160 48z"/></svg>`;
 
-        // 3. 抓取資料
-        async function fetchVatsimData() {
+        // 2. 獲取 VATSIM 數據
+        async function fetchData() {
             try {
                 const response = await fetch('https://data.vatsim.net/v3/vatsim-data.json');
                 const data = await response.json();
                 allPilots = data.pilots;
-                filterPlanes(); // 每次抓新資料都跑一次過濾繪製
+                allControllers = data.controllers.filter(c => c.facility > 0); // 過濾掉觀察員
+                
                 document.getElementById('count').innerText = allPilots.length;
-            } catch (error) {
-                console.error("Fetch Error:", error);
-            }
+                document.getElementById('atc-count').innerText = allControllers.length;
+                
+                updateAtcList();
+                filterData();
+            } catch (e) { console.error("Data Error", e); }
         }
 
-        // 4. 過濾與渲染
-        function filterPlanes() {
-            const searchTerm = document.getElementById('search-box').value.toUpperCase();
+        // 3. 更新側邊 ATC 列表
+        function updateAtcList() {
+            const list = document.getElementById('atc-list');
+            if (allControllers.length === 0) {
+                list.innerHTML = '<p style="color:#888">目前無在線管制</p>';
+                return;
+            }
+            list.innerHTML = allControllers.map(c => `
+                <div class="atc-item">
+                    <b>${c.callsign}</b> - ${c.frequency}<br>
+                    <small>${c.name}</small>
+                </div>
+            `).join('');
+        }
+
+        // 4. 繪製飛機
+        function filterData() {
+            const search = document.getElementById('search-box').value.toUpperCase();
             planeLayer.clearLayers();
 
-            allPilots.forEach(pilot => {
-                if (pilot.callsign.includes(searchTerm)) {
-                    // 根據航向旋轉飛機
-                    const heading = pilot.heading || 0;
+            allPilots.forEach(p => {
+                if (p.callsign.includes(search)) {
                     const icon = L.divIcon({
                         className: 'plane-icon',
-                        html: `<div class="plane-img" style="transform: rotate(${heading}deg);">${planeSvg}</div>`,
-                        iconSize: [20, 20],
-                        iconAnchor: [10, 10]
+                        html: `<div class="plane-img" style="transform: rotate(${p.heading}deg);">${planeSvg}</div>`,
+                        iconSize: [22, 22], iconAnchor: [11, 11]
                     });
 
-                    const marker = L.marker([pilot.latitude, pilot.longitude], { icon: icon });
-
-                    // 點擊後平滑移動到中心
-                    marker.on('click', (e) => {
-                        map.panTo(e.target.getLatLng());
-                    });
-
+                    const marker = L.marker([p.latitude, p.longitude], { icon: icon });
+                    
+                    // 彈窗內容整合 METAR 按鈕
+                    const dep = p.flight_plan?.departure || '未知';
+                    const arr = p.flight_plan?.arrival || '未知';
+                    
                     marker.bindPopup(`
-                        <div style="line-height: 1.5;">
-                            <b style="font-size: 14px;">${pilot.callsign} (${pilot.name})</b><br>
-                            <hr>
-                            <b>機型:</b> ${pilot.aircraft_short}<br>
-                            <b>高度:</b> ${pilot.altitude.toLocaleString()} ft<br>
-                            <b>速度:</b> ${pilot.groundspeed} kt<br>
-                            <b>航線:</b> <span style="color: blue;">${pilot.flight_plan?.departure || '??'}</span> → <span style="color: green;">${pilot.flight_plan?.arrival || '??'}</span><br>
-                            <b>跨代碼:</b> ${pilot.transponder}
+                        <div style="min-width: 180px;">
+                            <b style="font-size: 1.1em; color: #f39c12;">${p.callsign}</b><br>
+                            <small>${p.aircraft_short} | Squawk: ${p.transponder}</small><hr>
+                            <b>高度:</b> ${p.altitude.toLocaleString()} ft<br>
+                            <b>速度:</b> ${p.groundspeed} kt<br>
+                            <b>航線:</b> <br>
+                            <span class="metar-btn" onclick="fetchMetar('${dep}')">${dep} (天氣)</span> ✈️ 
+                            <span class="metar-btn" onclick="fetchMetar('${arr}')">${arr} (天氣)</span>
                         </div>
                     `);
-
                     marker.addTo(planeLayer);
                 }
             });
         }
 
-        // 5. 啟動與循環
-        fetchVatsimData();
-        setInterval(fetchVatsimData, 30000);
+        // 5. METAR 天氣查詢 (使用不用 Key 的公開 API 或提醒使用者)
+        async function fetchMetar(icao) {
+            if (icao === '未知') return;
+            try {
+                // 這裡使用 avwx 或是其他免費公開介面，若需穩定請改用 CheckWX 並填入 API Key
+                const res = await fetch(`https://api.allorigins.win/get?url=${encodeURIComponent('https://tgftp.nws.noaa.gov/data/observations/metar/stations/' + icao + '.TXT')}`);
+                const data = await res.json();
+                if (data.contents) {
+                    alert(`機場 ${icao} 即時天氣 (METAR):\n\n${data.contents}`);
+                } else {
+                    alert("找不到該機場天氣資料");
+                }
+            } catch (e) {
+                alert("獲取天氣失敗，請檢查機場代碼是否正確");
+            }
+        }
+
+        // 循環更新
+        fetchData();
+        setInterval(fetchData, 30000);
     </script>
 </body>
 </html>
