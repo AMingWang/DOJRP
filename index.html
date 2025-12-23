@@ -3,77 +3,114 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>即時飛行監控儀表板</title>
+    <title>VATSIM 即時飛行追蹤器</title>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <style>
-        body { margin: 0; padding: 0; }
-        #map { height: 100vh; width: 100%; }
+        body { margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        #map { height: 100vh; width: 100%; background: #0b1a2d; } /* 深色背景符合雷達感 */
+        
+        /* 左上角資訊面板 */
         .info-panel {
-            position: absolute; top: 10px; left: 50px; z-index: 1000;
-            background: white; padding: 10px; border-radius: 5px;
-            box-shadow: 0 0 15px rgba(0,0,0,0.2); font-family: sans-serif;
+            position: absolute; top: 10px; left: 10px; z-index: 1000;
+            background: rgba(255, 255, 255, 0.9); padding: 15px; border-radius: 8px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3); width: 220px;
+        }
+
+        /* 搜尋框樣式 */
+        #search-box {
+            width: 100%; padding: 8px; margin-top: 10px; border: 1px solid #ccc;
+            border-radius: 4px; box-sizing: border-box;
+        }
+
+        /* 飛機圖標 CSS 旋轉邏輯 */
+        .plane-icon {
+            background: none;
+            border: none;
+        }
+        .plane-img {
+            transition: transform 0.5s ease; /* 讓轉向更平滑 */
+            filter: drop-shadow(0px 0px 2px rgba(0,0,0,0.5));
         }
     </style>
 </head>
 <body>
 
     <div class="info-panel">
-        <b>VATSIM 即時地圖</b><br>
-        飛機數量: <span id="count">載入中...</span><br>
-        <small>每 30 秒自動更新</small>
+        <b style="font-size: 1.2em;">VATSIM Tracker</b><br>
+        在線飛機: <span id="count" style="color: #d35400; font-weight: bold;">載入中...</span><br>
+        <input type="text" id="search-box" placeholder="搜尋呼號 (e.g. EVA)" oninput="filterPlanes()">
+        <p style="font-size: 0.8em; color: #666; margin-bottom: 0;">點擊飛機查看詳細航路</p>
     </div>
 
     <div id="map"></div>
 
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script>
-        // 1. 初始化地圖 (中心設在台灣附近)
-        const map = L.map('map').setView([23.5, 121], 5);
+        // 1. 初始化地圖
+        const map = L.map('map', {
+            zoomControl: false // 隱藏預設按鈕，畫面更乾淨
+        }).setView([23.5, 121], 5);
 
-        // 2. 加入地圖底層 (使用 OpenStreetMap)
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            attribution: '&copy; OpenStreetMap contributors'
+        // 使用 CartoDB 的深色地圖底圖，讓飛機更明顯
+        L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+            attribution: '&copy; OpenStreetMap &copy; CARTO'
         }).addTo(map);
 
-        // 用來存放飛機標記的圖層群組
         let planeLayer = L.layerGroup().addTo(map);
+        let allPilots = []; // 儲存所有資料用於過濾
 
-        // 3. 抓取資料的函式
+        // 2. 飛機圖示的 SVG (也可以換成圖片網址)
+        const planeSvg = `
+            <svg viewBox="0 0 512 512" width="20" height="20" xmlns="http://www.w3.org/2000/svg">
+                <path fill="#f39c12" d="M448 336v-40L288 192V79.2c0-22.1-17.9-40-40-40s-40 17.9-40 40V192L48 296v40l160-48v113.6l-48 31.2V472l88-24 88 24v-41.2l-48-31.2V288l160 48z"/>
+            </svg>`;
+
+        // 3. 抓取資料
         async function fetchVatsimData() {
             try {
                 const response = await fetch('https://data.vatsim.net/v3/vatsim-data.json');
                 const data = await response.json();
-                renderPlanes(data.pilots);
-                document.getElementById('count').innerText = data.pilots.length;
+                allPilots = data.pilots;
+                filterPlanes(); // 每次抓新資料都跑一次過濾繪製
+                document.getElementById('count').innerText = allPilots.length;
             } catch (error) {
-                console.error("資料抓取失敗:", error);
+                console.error("Fetch Error:", error);
             }
         }
 
-        // 4. 將飛機繪製到地圖上
-        function renderPlanes(pilots) {
-            planeLayer.clearLayers(); // 先清除舊的飛機
+        // 4. 過濾與渲染
+        function filterPlanes() {
+            const searchTerm = document.getElementById('search-box').value.toUpperCase();
+            planeLayer.clearLayers();
 
-            pilots.forEach(pilot => {
-                if (pilot.latitude && pilot.longitude) {
-                    // 建立簡單的圓點標記 (也可以換成飛機圖片)
-                    const marker = L.circleMarker([pilot.latitude, pilot.longitude], {
-                        radius: 4,
-                        fillColor: "#ff7800",
-                        color: "#000",
-                        weight: 1,
-                        opacity: 1,
-                        fillOpacity: 0.8
+            allPilots.forEach(pilot => {
+                if (pilot.callsign.includes(searchTerm)) {
+                    // 根據航向旋轉飛機
+                    const heading = pilot.heading || 0;
+                    const icon = L.divIcon({
+                        className: 'plane-icon',
+                        html: `<div class="plane-img" style="transform: rotate(${heading}deg);">${planeSvg}</div>`,
+                        iconSize: [20, 20],
+                        iconAnchor: [10, 10]
                     });
 
-                    // 設定彈出視窗資訊
+                    const marker = L.marker([pilot.latitude, pilot.longitude], { icon: icon });
+
+                    // 點擊後平滑移動到中心
+                    marker.on('click', (e) => {
+                        map.panTo(e.target.getLatLng());
+                    });
+
                     marker.bindPopup(`
-                        <b>呼號: ${pilot.callsign}</b><br>
-                        機型: ${pilot.aircraft_short || '未知'}<br>
-                        高度: ${pilot.altitude} ft<br>
-                        速度: ${pilot.groundspeed} kt<br>
-                        出發: ${pilot.flight_plan?.departure || 'N/A'}<br>
-                        目的地: ${pilot.flight_plan?.arrival || 'N/A'}
+                        <div style="line-height: 1.5;">
+                            <b style="font-size: 14px;">${pilot.callsign} (${pilot.name})</b><br>
+                            <hr>
+                            <b>機型:</b> ${pilot.aircraft_short}<br>
+                            <b>高度:</b> ${pilot.altitude.toLocaleString()} ft<br>
+                            <b>速度:</b> ${pilot.groundspeed} kt<br>
+                            <b>航線:</b> <span style="color: blue;">${pilot.flight_plan?.departure || '??'}</span> → <span style="color: green;">${pilot.flight_plan?.arrival || '??'}</span><br>
+                            <b>跨代碼:</b> ${pilot.transponder}
+                        </div>
                     `);
 
                     marker.addTo(planeLayer);
@@ -81,9 +118,9 @@
             });
         }
 
-        // 5. 設定定時更新
+        // 5. 啟動與循環
         fetchVatsimData();
-        setInterval(fetchVatsimData, 30000); // 30 秒更新一次
+        setInterval(fetchVatsimData, 30000);
     </script>
 </body>
 </html>
