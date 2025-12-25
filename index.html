@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>VATSIM Pro Radar - Global & Interactive</title>
+    <title>VATSIM Pro Radar - Full Integration</title>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <style>
         html, body { 
@@ -71,14 +71,12 @@
     <script src="https://unpkg.com/@joergdietrich/leaflet.terminator"></script>
 
     <script>
-        // 初始化地圖
         const map = L.map('map', { zoomControl: false }).setView([23.5, 121], 5);
         L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', { attribution: '&copy; CARTO' }).addTo(map);
 
         let terminator = L.terminator({ fillColor: '#000', fillOpacity: 0.3, color: '#444', weight: 1 }).addTo(map);
         setInterval(() => { terminator.setTime(); }, 60000);
 
-        // 圖層定義
         let airportLayer = L.layerGroup().addTo(map);
         let historyLayer = L.layerGroup().addTo(map);
         let vectorLayer = L.layerGroup().addTo(map);
@@ -90,7 +88,6 @@
 
         const planeSvg = (color) => `<svg viewBox="0 0 512 512" width="20" height="20"><path fill="${color}" d="M448 336v-40L288 192V79.2c0-22.1-17.9-40-40-40s-40 17.9-40 40V192L48 296v40l160-48v113.6l-48 31.2V472l88-24 88 24v-41.2l-48-31.2V288l160 48z"/></svg>`;
 
-        // 1. 載入全球機場數據
         async function fetchAirports() {
             try {
                 const res = await fetch('https://raw.githubusercontent.com/mwigg/Airports/master/airports.json');
@@ -104,10 +101,9 @@
                         marker.addTo(airportLayer);
                     }
                 });
-            } catch (e) { console.error("機場數據加載失敗"); }
+            } catch (e) { console.error("機場載入失敗"); }
         }
 
-        // 縮放控制：Zoom < 5 時隱藏機場
         map.on('zoomend', () => {
             if (map.getZoom() < 5) map.removeLayer(airportLayer);
             else map.addLayer(airportLayer);
@@ -129,7 +125,7 @@
                     const target = allPilots.find(p => p.callsign === trackingTarget);
                     if (target) {
                         map.panTo([target.latitude, target.longitude]);
-                        showFlightHistory(trackingTarget); // 同步更新歷史軌跡
+                        showFlightHistory(trackingTarget);
                     }
                 }
             } catch (e) { console.error("數據獲取失敗:", e); }
@@ -153,7 +149,6 @@
             return [(lat2 * 180) / Math.PI, (lon2 * 180) / Math.PI];
         }
 
-        // 2. 顯示特定飛機軌跡線
         function showFlightHistory(callsign) {
             historyLayer.clearLayers();
             if (flightHistories[callsign] && flightHistories[callsign].length > 1) {
@@ -169,7 +164,6 @@
             const search = document.getElementById('search-box').value.toUpperCase();
 
             allPilots.forEach(p => {
-                // 持續紀錄所有飛機歷史（在後台運算，但不在此繪製）
                 if (!flightHistories[p.callsign]) flightHistories[p.callsign] = [];
                 flightHistories[p.callsign].push([p.latitude, p.longitude]);
                 if (flightHistories[p.callsign].length > 40) flightHistories[p.callsign].shift();
@@ -184,7 +178,6 @@
                     if (p.altitude > 10000) color = "#f1c40f";
                     if (p.altitude > 30000) color = "#ffffff";
 
-                    // 預測向量線
                     if (p.groundspeed > 40) {
                         const endPoint = getVectorEnd(p.latitude, p.longitude, p.heading, p.groundspeed);
                         L.polyline([[p.latitude, p.longitude], endPoint], {
@@ -199,15 +192,27 @@
                     });
 
                     const marker = L.marker([p.latitude, p.longitude], { icon: icon });
+                    
+                    // 彈窗整合機型與 SQK
                     marker.bindPopup(`
-                        <div style="min-width: 180px;">
-                            <b style="font-size: 1.1em; color: #00d2ff;">${p.callsign}</b>${trendIcon}
-                            <br>ALT: <b>${p.altitude.toLocaleString()} ft</b> | SPD: <b>${p.groundspeed} kt</b>
-                            <div class="route-box">${p.flight_plan?.departure || '??'} ➔ ${p.flight_plan?.arrival || '??'}</div>
+                        <div style="min-width: 200px;">
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px;">
+                                <b style="font-size: 1.2em; color: #00d2ff;">${p.callsign}</b>
+                                <span style="background: #1c2b39; padding: 2px 6px; border-radius: 4px; font-family: monospace; color: #f1c40f; border: 1px solid #34495e;">
+                                    SQ ${p.transponder}
+                                </span>
+                            </div>
+                            <div style="color: #bdc3c7; font-size: 0.9em; line-height: 1.6;">
+                                機型: <b style="color: white;">${p.flight_plan?.aircraft_short || p.aircraft_short || "---"}</b> ${trendIcon}<br>
+                                高度: <b style="color: white;">${p.altitude.toLocaleString()} ft</b><br>
+                                速度: <b style="color: white;">${p.groundspeed} kt</b>
+                            </div>
+                            <div class="route-box">
+                                ${p.flight_plan?.departure || '??'} ➔ ${p.flight_plan?.arrival || '??'}
+                            </div>
                         </div>
                     `);
 
-                    // 點擊飛機觸發軌跡與追蹤
                     marker.on('click', () => {
                         showFlightHistory(p.callsign);
                         startTracking(p.callsign);
@@ -218,7 +223,6 @@
             });
         }
 
-        // 3. 搜尋聯動功能
         function handleSearch(val) {
             const cs = val.toUpperCase();
             const target = allPilots.find(p => p.callsign === cs);
@@ -238,10 +242,9 @@
         function stopTracking() {
             trackingTarget = null;
             document.getElementById('track-info').style.display = 'none';
-            historyLayer.clearLayers(); // 清除軌跡
+            historyLayer.clearLayers();
         }
 
-        // 初始化
         fetchAirports();
         fetchData();
         setInterval(fetchData, 30000);
