@@ -3,36 +3,28 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>VATSIM Pro Radar - Vertical & Trail</title>
+    <title>VATSIM Pro Radar - Global & Interactive</title>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <style>
-        /* 確保全畫面撐開 */
         html, body { 
             margin: 0; padding: 0; width: 100%; height: 100%; 
             background: #0b1622; font-family: 'Segoe UI', Arial, sans-serif; 
-            overflow: hidden; /* 防止滾動條導致版面跳動 */
+            overflow: hidden; 
         }
 
-        /* 修正地圖容器定位 */
-        #map { 
-            position: absolute; top: 0; bottom: 0; width: 100%; 
-            background: #0b1622; z-index: 1; 
-        }
+        #map { position: absolute; top: 0; bottom: 0; width: 100%; background: #0b1622; z-index: 1; }
         
-        /* 側邊面板 */
         .side-panel {
             position: absolute; top: 10px; left: 10px; z-index: 1000;
             background: rgba(11, 22, 34, 0.9); width: 280px; max-height: 90vh;
             border-radius: 8px; box-shadow: 0 4px 20px rgba(0,0,0,0.6);
-            display: flex; flex-direction: column; border: 1px solid #2c3e50;
-            color: white;
+            display: flex; flex-direction: column; border: 1px solid #2c3e50; color: white;
         }
 
         .panel-header { padding: 15px; border-bottom: 1px solid #2c3e50; }
         .search-input { 
             width: 100%; padding: 10px; border-radius: 4px; border: 1px solid #34495e; 
-            background: #1c2b39; color: white; box-sizing: border-box; margin-top: 10px;
-            outline: none;
+            background: #1c2b39; color: white; box-sizing: border-box; margin-top: 10px; outline: none;
         }
 
         .list-container { flex: 1; overflow-y: auto; padding: 10px; }
@@ -47,7 +39,12 @@
             font-size: 0.85em; text-align: center; cursor: pointer; display: none;
         }
 
-        /* Leaflet 彈窗樣式 */
+        /* 機場標籤樣式 */
+        .airport-label {
+            background: transparent !important; border: none !important; box-shadow: none !important;
+            color: #2ecc71 !important; font-weight: bold; font-size: 10px; text-shadow: 1px 1px 2px #000;
+        }
+
         .leaflet-popup-content-wrapper { background: #0b1622; color: white; border: 1px solid #2c3e50; border-radius: 8px; }
         .route-box { background: #2c3e50; padding: 6px; border-radius: 4px; text-align: center; margin-top: 8px; color: #00d2ff; }
         .trend-up { color: #2ecc71; font-weight: bold; }
@@ -58,9 +55,9 @@
 
     <div class="side-panel">
         <div class="panel-header">
-            <b style="font-size: 1.1em; color: #00d2ff;">VATSIM ADVANCED RADAR</b><br>
+            <b style="font-size: 1.1em; color: #00d2ff;">VATSIM PRO RADAR</b><br>
             <small>在線：<span id="count">0</span> | 管制：<span id="atc-count">0</span></small>
-            <input type="text" id="search-box" class="search-input" placeholder="搜尋呼號追蹤" onkeydown="if(event.key==='Enter') startTracking(this.value)">
+            <input type="text" id="search-box" class="search-input" placeholder="搜尋呼號並按 Enter" onkeydown="if(event.key==='Enter') handleSearch(this.value)">
         </div>
         <div id="track-info" class="tracking-status" onclick="stopTracking()">
             正在鎖定: <span id="tracking-callsign">---</span> (點擊取消)
@@ -74,26 +71,47 @@
     <script src="https://unpkg.com/@joergdietrich/leaflet.terminator"></script>
 
     <script>
-        // 初始化地圖，確保容器高度已計算
+        // 初始化地圖
         const map = L.map('map', { zoomControl: false }).setView([23.5, 121], 5);
-        
-        // 使用 Dark Matter 疊層
-        L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', { 
-            attribution: '&copy; CARTO' 
-        }).addTo(map);
+        L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', { attribution: '&copy; CARTO' }).addTo(map);
 
         let terminator = L.terminator({ fillColor: '#000', fillOpacity: 0.3, color: '#444', weight: 1 }).addTo(map);
         setInterval(() => { terminator.setTime(); }, 60000);
 
-        let planeLayer = L.layerGroup().addTo(map);
-        let vectorLayer = L.layerGroup().addTo(map);
+        // 圖層定義
+        let airportLayer = L.layerGroup().addTo(map);
         let historyLayer = L.layerGroup().addTo(map);
+        let vectorLayer = L.layerGroup().addTo(map);
+        let planeLayer = L.layerGroup().addTo(map);
         
         let allPilots = [];
         let trackingTarget = null;
         let flightHistories = {};
 
         const planeSvg = (color) => `<svg viewBox="0 0 512 512" width="20" height="20"><path fill="${color}" d="M448 336v-40L288 192V79.2c0-22.1-17.9-40-40-40s-40 17.9-40 40V192L48 296v40l160-48v113.6l-48 31.2V472l88-24 88 24v-41.2l-48-31.2V288l160 48z"/></svg>`;
+
+        // 1. 載入全球機場數據
+        async function fetchAirports() {
+            try {
+                const res = await fetch('https://raw.githubusercontent.com/mwigg/Airports/master/airports.json');
+                const data = await res.json();
+                data.forEach(ap => {
+                    if (ap.icao) {
+                        const marker = L.circleMarker([ap.lat, ap.lon], {
+                            radius: 3, color: '#2ecc71', fillColor: '#2ecc71', fillOpacity: 0.8, weight: 1
+                        });
+                        marker.bindTooltip(ap.icao, { permanent: true, direction: 'bottom', className: 'airport-label', offset: [0, 5] });
+                        marker.addTo(airportLayer);
+                    }
+                });
+            } catch (e) { console.error("機場數據加載失敗"); }
+        }
+
+        // 縮放控制：Zoom < 5 時隱藏機場
+        map.on('zoomend', () => {
+            if (map.getZoom() < 5) map.removeLayer(airportLayer);
+            else map.addLayer(airportLayer);
+        });
 
         async function fetchData() {
             try {
@@ -109,7 +127,10 @@
                 
                 if (trackingTarget) {
                     const target = allPilots.find(p => p.callsign === trackingTarget);
-                    if (target) map.panTo([target.latitude, target.longitude]);
+                    if (target) {
+                        map.panTo([target.latitude, target.longitude]);
+                        showFlightHistory(trackingTarget); // 同步更新歷史軌跡
+                    }
                 }
             } catch (e) { console.error("數據獲取失敗:", e); }
         }
@@ -132,22 +153,28 @@
             return [(lat2 * 180) / Math.PI, (lon2 * 180) / Math.PI];
         }
 
+        // 2. 顯示特定飛機軌跡線
+        function showFlightHistory(callsign) {
+            historyLayer.clearLayers();
+            if (flightHistories[callsign] && flightHistories[callsign].length > 1) {
+                L.polyline(flightHistories[callsign], {
+                    color: '#00d2ff', weight: 2, opacity: 0.8, dashArray: '5, 10', smoothFactor: 1
+                }).addTo(historyLayer);
+            }
+        }
+
         function renderPlanes() {
             planeLayer.clearLayers();
             vectorLayer.clearLayers();
-            historyLayer.clearLayers();
             const search = document.getElementById('search-box').value.toUpperCase();
 
             allPilots.forEach(p => {
+                // 持續紀錄所有飛機歷史（在後台運算，但不在此繪製）
+                if (!flightHistories[p.callsign]) flightHistories[p.callsign] = [];
+                flightHistories[p.callsign].push([p.latitude, p.longitude]);
+                if (flightHistories[p.callsign].length > 40) flightHistories[p.callsign].shift();
+
                 if (search === "" || p.callsign.includes(search)) {
-                    if (!flightHistories[p.callsign]) flightHistories[p.callsign] = [];
-                    flightHistories[p.callsign].push([p.latitude, p.longitude]);
-                    if (flightHistories[p.callsign].length > 20) flightHistories[p.callsign].shift();
-
-                    L.polyline(flightHistories[p.callsign], {
-                        color: '#ffffff', weight: 1.5, opacity: 0.25, smoothFactor: 1
-                    }).addTo(historyLayer);
-
                     let trendIcon = "";
                     if (p.altitude > 100 && Math.abs(p.vertical_speed) > 400) {
                         trendIcon = p.vertical_speed > 0 ? '<span class="trend-up"> ▲</span>' : '<span class="trend-down"> ▼</span>';
@@ -157,6 +184,7 @@
                     if (p.altitude > 10000) color = "#f1c40f";
                     if (p.altitude > 30000) color = "#ffffff";
 
+                    // 預測向量線
                     if (p.groundspeed > 40) {
                         const endPoint = getVectorEnd(p.latitude, p.longitude, p.heading, p.groundspeed);
                         L.polyline([[p.latitude, p.longitude], endPoint], {
@@ -174,19 +202,31 @@
                     marker.bindPopup(`
                         <div style="min-width: 180px;">
                             <b style="font-size: 1.1em; color: #00d2ff;">${p.callsign}</b>${trendIcon}
-                            <span style="font-size: 0.8em; float: right; color:#888;">${p.name}</span><br>
-                            <div style="margin: 5px 0; font-size: 0.9em; line-height: 1.5;">
-                                機型: <b>${p.flight_plan?.aircraft_short || p.aircraft_short || "未知"}</b><br>
-                                高度: <b>${p.altitude.toLocaleString()} ft</b><br>
-                                速度: <b>${p.groundspeed} kt</b> | SQ: <b>${p.transponder}</b>
-                            </div>
+                            <br>ALT: <b>${p.altitude.toLocaleString()} ft</b> | SPD: <b>${p.groundspeed} kt</b>
                             <div class="route-box">${p.flight_plan?.departure || '??'} ➔ ${p.flight_plan?.arrival || '??'}</div>
                         </div>
                     `);
-                    marker.on('click', () => startTracking(p.callsign));
+
+                    // 點擊飛機觸發軌跡與追蹤
+                    marker.on('click', () => {
+                        showFlightHistory(p.callsign);
+                        startTracking(p.callsign);
+                    });
+
                     marker.addTo(planeLayer);
                 }
             });
+        }
+
+        // 3. 搜尋聯動功能
+        function handleSearch(val) {
+            const cs = val.toUpperCase();
+            const target = allPilots.find(p => p.callsign === cs);
+            if (target) {
+                map.setView([target.latitude, target.longitude], 10);
+                showFlightHistory(cs);
+                startTracking(cs);
+            }
         }
 
         function startTracking(callsign) {
@@ -198,8 +238,11 @@
         function stopTracking() {
             trackingTarget = null;
             document.getElementById('track-info').style.display = 'none';
+            historyLayer.clearLayers(); // 清除軌跡
         }
 
+        // 初始化
+        fetchAirports();
         fetchData();
         setInterval(fetchData, 30000);
     </script>
