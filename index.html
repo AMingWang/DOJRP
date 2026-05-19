@@ -3,251 +3,470 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>VATSIM Pro Radar - Full Integration</title>
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <title>LOS ANGELES PROJECT | LA角色扮演企劃</title>
     <style>
-        html, body { 
-            margin: 0; padding: 0; width: 100%; height: 100%; 
-            background: #0b1622; font-family: 'Segoe UI', Arial, sans-serif; 
-            overflow: hidden; 
-        }
+        /* 全域設定 */
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        body { background-color: #121212; color: #e0e0e0; line-height: 1.6; }
 
-        #map { position: absolute; top: 0; bottom: 0; width: 100%; background: #0b1622; z-index: 1; }
+        /* 頂部導覽列 */
+        header { background-color: #1a1a1a; padding: 1rem 5%; display: flex; justify-content: space-between; align-items: center; border-bottom: 3px solid #1e40af; position: sticky; top: 0; z-index: 100; flex-wrap: wrap; gap: 15px; }
+        .logo { font-size: 1.5rem; font-weight: bold; color: #ffffff; letter-spacing: 2px; }
+        .logo span { color: #f59e0b; }
+        nav ul { list-style: none; display: flex; gap: 10px; flex-wrap: wrap; }
+        nav a { color: #e0e0e0; text-decoration: none; font-weight: 500; font-size: 0.9rem; transition: 0.3s; cursor: pointer; padding: 8px 12px; border-radius: 4px; background-color: #222; }
+        nav a:hover, nav a.active { background-color: #1e40af; color: white; }
+
+        /* 頁籤切換機制 */
+        .tab-content { display: none; animation: fadeIn 0.4s; }
+        .tab-content.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* 共用版面設定 */
+        section { padding: 40px 5%; max-width: 1200px; margin: 0 auto; min-height: 75vh; }
+        h2.section-title { font-size: 1.8rem; margin-bottom: 25px; color: #fff; border-left: 5px solid #1e40af; padding-left: 15px; }
+        .btn { display: inline-block; background-color: #1e40af; color: white; padding: 12px 28px; text-decoration: none; border-radius: 5px; font-weight: bold; transition: 0.3s; border: none; cursor: pointer; margin-top: 15px; }
+        .btn:hover { background-color: #1e3a8a; }
+
+        /* 首頁公告 */
+        .announcement-box { background-color: #1a1a1a; border-left: 5px solid #f59e0b; padding: 25px; border-radius: 8px; margin-bottom: 40px; border: 1px solid #333; }
+        .announcement-item { margin-bottom: 15px; padding-bottom: 15px; border-bottom: 1px dashed #333; }
+        .announcement-item:last-child { margin-bottom: 0; padding-bottom: 0; border-bottom: none; }
+        .announce-date { color: #f59e0b; font-weight: bold; font-size: 0.85rem; margin-bottom: 5px; display: inline-block; background-color: rgba(245, 158, 11, 0.1); padding: 3px 8px; border-radius: 4px; }
+        .announce-title { color: #fff; font-size: 1.1rem; margin-bottom: 5px; font-weight: bold; }
+        .announce-text { color: #aaa; font-size: 0.95rem; }
+
+        /* 法規折疊選單 */
+        .accordion { background-color: #1e1e1e; color: #fff; cursor: pointer; padding: 18px; width: 100%; text-align: left; border: none; outline: none; transition: 0.4s; font-size: 1.1rem; border-bottom: 1px solid #333; font-weight: bold; }
+        .active-acc, .accordion:hover { background-color: #2a2a2a; border-left: 4px solid #1e40af; }
+        .panel { padding: 0 18px; background-color: #121212; max-height: 0; overflow: hidden; transition: max-height 0.3s ease-out; }
+        .panel p { padding: 12px 0; color: #aaa; border-bottom: 1px dashed #333; line-height: 1.5; font-size: 0.95rem; }
+        .panel p:last-child { border-bottom: none; }
+        .law-code { color: #f59e0b; font-weight: bold; margin-right: 15px; display: inline-block; min-width: 140px; }
+
+        /* 罰款表格 */
+        .table-container { overflow-x: auto; margin-bottom: 30px; border-radius: 8px; border: 1px solid #333; }
+        .fine-table { width: 100%; border-collapse: collapse; min-width: 800px; text-align: left; }
+        .fine-table th, .fine-table td { padding: 15px; border-bottom: 1px solid #333; }
+        .fine-table th { background-color: #1e40af; color: #fff; font-weight: bold; font-size: 1.05rem; }
+        .fine-table tr:nth-child(even) { background-color: #1a1a1a; }
+        .fine-table tr:hover { background-color: #2a2a2a; }
+        .fine-table td { color: #ccc; font-size: 0.95rem; }
+        .highlight-red { color: #ef4444; font-weight: bold; }
         
-        .side-panel {
-            position: absolute; top: 10px; left: 10px; z-index: 1000;
-            background: rgba(11, 22, 34, 0.9); width: 280px; max-height: 90vh;
-            border-radius: 8px; box-shadow: 0 4px 20px rgba(0,0,0,0.6);
-            display: flex; flex-direction: column; border: 1px solid #2c3e50; color: white;
-        }
+        /* 網格系統與卡片 */
+        .grid-container { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; margin-bottom: 40px; }
+        .card { background-color: #1e1e1e; padding: 25px; border-radius: 8px; border-top: 3px solid #1e40af; }
+        .card h3 { color: #fff; margin-bottom: 10px; }
+        .card p { color: #aaa; font-size: 0.9rem; margin-bottom: 10px; }
+        .sop-list { list-style-type: disc; margin-left: 20px; color: #aaa; font-size: 0.95rem; line-height: 1.6; }
+        .sop-list li { margin-bottom: 10px; }
+        .sop-highlight { color: #1e40af; font-weight: bold; }
 
-        .panel-header { padding: 15px; border-bottom: 1px solid #2c3e50; }
-        .search-input { 
-            width: 100%; padding: 10px; border-radius: 4px; border: 1px solid #34495e; 
-            background: #1c2b39; color: white; box-sizing: border-box; margin-top: 10px; outline: none;
-        }
+        /* 部門介紹專屬樣式 */
+        .dept-card { border-top: 4px solid #fff; }
+        .dept-lapd { border-top-color: #1e3a8a; }
+        .dept-lasd { border-top-color: #166534; }
+        .dept-chp { border-top-color: #b45309; }
+        .dept-lafd { border-top-color: #991b1b; }
+        .badge-title { font-size: 0.8rem; font-weight: bold; padding: 3px 8px; border-radius: 4px; display: inline-block; margin-bottom: 10px; }
 
-        .list-container { flex: 1; overflow-y: auto; padding: 10px; }
-        .atc-item { 
-            background: #1c2b39; margin-bottom: 5px; padding: 8px; 
-            border-radius: 4px; border-left: 4px solid #00d2ff; font-size: 0.85em;
-            display: flex; justify-content: space-between;
-        }
+        /* 測驗中心 */
+        .quiz-box { background-color: #1e1e1e; padding: 30px; border-radius: 8px; border: 1px solid #333; }
+        .quiz-q { margin-bottom: 15px; color: #e0e0e0; font-weight: bold; font-size: 1.1rem; }
+        .quiz-options label { display: block; margin-bottom: 10px; color: #aaa; cursor: pointer; padding: 10px; background-color: #121212; border-radius: 4px; border: 1px solid #222; transition: 0.2s; }
+        .quiz-options label:hover { background-color: #2a2a2a; border-color: #1e40af; }
+        .input-group { margin-bottom: 25px; }
+        .input-group label { display: block; margin-bottom: 10px; font-weight: bold; color: #fff; }
+        .input-group input { width: 100%; max-width: 400px; padding: 12px; background-color: #121212; border: 1px solid #333; border-radius: 5px; color: #fff; font-size: 1rem; }
+        .input-group input:focus { border-color: #1e40af; outline: none; }
+        #quiz-questions-area { display: none; }
+        #apply-link-box { display: none; margin-top: 25px; padding: 20px; background-color: #166534; border-radius: 5px; text-align: center; }
 
-        .tracking-status {
-            padding: 8px; background: #e74c3c; color: white; 
-            font-size: 0.85em; text-align: center; cursor: pointer; display: none;
-        }
-
-        /* 機場標籤樣式 */
-        .airport-label {
-            background: transparent !important; border: none !important; box-shadow: none !important;
-            color: #2ecc71 !important; font-weight: bold; font-size: 10px; text-shadow: 1px 1px 2px #000;
-        }
-
-        .leaflet-popup-content-wrapper { background: #0b1622; color: white; border: 1px solid #2c3e50; border-radius: 8px; }
-        .route-box { background: #2c3e50; padding: 6px; border-radius: 4px; text-align: center; margin-top: 8px; color: #00d2ff; }
-        .trend-up { color: #2ecc71; font-weight: bold; }
-        .trend-down { color: #e74c3c; font-weight: bold; }
+        footer { background-color: #0f0f0f; text-align: center; padding: 25px; border-top: 1px solid #333; margin-top: 20px; font-size: 0.9rem; color: #666; }
     </style>
 </head>
 <body>
 
-    <div class="side-panel">
-        <div class="panel-header">
-            <b style="font-size: 1.1em; color: #00d2ff;">VATSIM PRO RADAR</b><br>
-            <small>在線：<span id="count">0</span> | 管制：<span id="atc-count">0</span></small>
-            <input type="text" id="search-box" class="search-input" placeholder="搜尋呼號並按 Enter" onkeydown="if(event.key==='Enter') handleSearch(this.value)">
-        </div>
-        <div id="track-info" class="tracking-status" onclick="stopTracking()">
-            正在鎖定: <span id="tracking-callsign">---</span> (點擊取消)
-        </div>
-        <div id="atc-list" class="list-container"></div>
+    <!-- 頂部導覽列 -->
+    <header>
+        <div class="logo">LA<span> PROJECT</span></div>
+        <nav>
+            <ul>
+                <li><a onclick="openTab('page-home')" id="nav-home" class="active">首頁大廳</a></li>
+                <li><a onclick="openTab('page-depts')" id="nav-depts">各部門介紹</a></li>
+                <li><a onclick="openTab('page-rules')" id="nav-rules">加州/LA法規全書</a></li>
+                <li><a onclick="openTab('page-sop')" id="nav-sop">SOP與10代碼</a></li>
+                <li><a onclick="openTab('page-apply')" id="nav-apply">警校招募中心</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <!-- ================= 1. 首頁大廳 ================= -->
+    <div id="page-home" class="tab-content active">
+        <section style="padding-top: 20px;">
+            <div class="hero">
+                <h1>LOS ANGELES PROJECT</h1>
+                <p>基於真實洛杉磯警政編制與加州司法框架。最高品質的執法、救援與市民 RP 扮演，歡迎來到天使之城。</p>
+                <a href="#" class="btn">加入 LA Project Discord</a>
+            </div>
+            
+            <h2 class="section-title">洛杉磯市政公告</h2>
+            <div class="announcement-box">
+                <div class="announcement-item">
+                    <div class="announce-date">👮 聯合招募</div>
+                    <div class="announce-title">LAPD 洛杉磯警察局 / CHP 加州公路巡警招生中</div>
+                    <div class="announce-text">執法部門聯合招募通道正式開啟。本季考核全面採用「10題情境邏輯思維問卷」，旨在考核玩家的扮演情商與思維配合度。請至招募中心填寫名稱進行答題。</div>
+                </div>
+            </div>
+        </section>
     </div>
 
-    <div id="map"></div>
+    <!-- ================= 2. 各部門介紹 ================= -->
+    <div id="page-depts" class="tab-content">
+        <section>
+            <h2 class="section-title">洛杉磯公共安全機關編制</h2>
+            <p style="color: #aaa; margin-bottom: 30px;">LA Project 擁有高度專業化的核心執法與救援單位，各部門各司其職，緊密合作維持全郡秩序。</p>
 
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-    <script src="https://unpkg.com/@joergdietrich/leaflet.terminator"></script>
+            <div class="grid-container">
+                <div class="card dept-card dept-lapd">
+                    <span class="badge-title" style="background-color: rgba(30, 58, 138, 0.2); color: #60a5fa;">LAPD</span>
+                    <h3>洛杉磯警察局</h3>
+                    <p style="font-style: italic; color: #888; font-size: 0.85rem;">"To Protect and to Serve" (保護市民，服務大眾)</p>
+                    <p style="margin-top: 10px;">負責市區常規巡邏、重大街頭刑案偵辦、市民報案處理。旗下編有交通管理科、K9 警犬隊以及大名鼎鼎的 SWAT 特種部隊，是城市內部秩序的核心支柱。</p>
+                </div>
+                <div class="card dept-card dept-lasd">
+                    <span class="badge-title" style="background-color: rgba(22, 101, 52, 0.2); color: #4ade80;">LASD</span>
+                    <h3>洛杉磯郡警長局</h3>
+                    <p style="font-style: italic; color: #888; font-size: 0.85rem;">"Tradition of Service" (服務的傳統)</p>
+                    <p style="margin-top: 10px;">負責城市周邊、偏遠郡縣與荒野的巡邏，並全權主管監獄看守、受刑人移送與法庭安全維護。在偏遠地區具備最高執法權，擅長山區與野外搜捕作戰。</p>
+                </div>
+                <div class="card dept-card dept-chp">
+                    <span class="badge-title" style="background-color: rgba(180, 83, 9, 0.2); color: #fbbf24;">CHP</span>
+                    <h3>加州公路巡警</h3>
+                    <p style="font-style: italic; color: #888; font-size: 0.85rem;">"Safety and Service" (安全與服務)</p>
+                    <p style="margin-top: 10px;">城市的交通大動脈守護者。專職負責高速公路上的飛車追捕 (10-80)、重大交通攔停、商業重型卡車超載稽查及公路車禍現場還原。擁有極高水準的高速駕駛與攔截技巧。</p>
+                </div>
+                <div class="card dept-card dept-lafd">
+                    <span class="badge-title" style="background-color: rgba(153, 27, 27, 0.2); color: #f87171;">LAFD</span>
+                    <h3>洛杉磯消防局</h3>
+                    <p style="font-style: italic; color: #888; font-size: 0.85rem;">"Serving with Courage, Integrity, and Pride"</p>
+                    <p style="margin-top: 10px;">負責重大火災撲滅、車禍現場破壞剪救援、以及第一線受傷平民、中槍嫌犯的緊急醫療救護 (EMS)。航空搜救隊更支援高空索降救援，是不分平民與警匪的生命守護者。</p>
+                </div>
+            </div>
+        </section>
+    </div>
 
-    <script>
-        const map = L.map('map', { zoomControl: false }).setView([23.5, 121], 5);
-        L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', { attribution: '&copy; CARTO' }).addTo(map);
+    <!-- ================= 3. 加州/LA法規全書 ================= -->
+    <div id="page-rules" class="tab-content">
+        <section>
+            <h2 class="section-title">加州法規資料庫 (California Codes)</h2>
+            <p style="color: #aaa; margin-bottom: 30px;">本市執法嚴格遵循加州車輛法規 (CVC)、刑法 (PC) 與健康安全法規 (H&S)。點擊分類可展開查閱詳細條文。</p>
+            
+            <button class="accordion">📘 1. CVC - 車輛牌照與違規改裝處罰 (Admin & Tuning)</button>
+            <div class="panel">
+                <p><span class="law-code">CVC 4000(a)(1)</span> <strong>未註冊車輛：</strong> 駕駛未向監理站登記或牌照貼紙過期之車輛上路。</p>
+                <p><span class="law-code">CVC 4454(a)</span> <strong>行車未攜帶行照：</strong> 駕駛機動車輛上路，卻無法當場出示有效的車輛註冊證明文件。</p>
+                <p><span class="law-code">CVC 5200(a)</span> <strong>未依規定懸掛車牌：</strong> 故意不懸掛前後車牌、或惡意遮蔽車牌規避警方巡邏辨識。</p>
+                <p><span class="law-code">CVC 12500(a)</span> <strong>無照駕駛：</strong> 在未持有合法、有效之加州汽機車駕駛執照的情況下操作機動載具。</p>
+                <p><span class="law-code">CVC 27150</span> <strong>非法改裝直通排氣管：</strong> 故意拆除車輛消音器，或改裝直通管、炸街管，製造巨大爆音與引擎噪音。</p>
+            </div>
 
-        let terminator = L.terminator({ fillColor: '#000', fillOpacity: 0.3, color: '#444', weight: 1 }).addTo(map);
-        setInterval(() => { terminator.setTime(); }, 60000);
+            <button class="accordion">📘 2. CVC - 行車號誌、超速、路權與危險逼車 (Moving Violations)</button>
+            <div class="panel">
+                <p><span class="law-code">CVC 21453(a)</span> <strong>違規闖紅燈：</strong> 面對紅燈號誌未在停止線前完全煞停，強行穿越路口。</p>
+                <p><span class="law-code">CVC 22450(a)</span> <strong>無視停止標誌 (Stop Sign)：</strong> 遇「STOP」標誌未完全將車速歸零靜止至少 3 秒，即滑行通過。</p>
+                <p><span class="law-code">CVC 21651(b)</span> <strong>跨越雙黃線逆向行駛：</strong> 惡意跨越實線分隔島、安全島或公路雙黃線，行駛於對向車道。</p>
+                <p><span class="law-code">CVC 21703</span> <strong>未保持安全距離 (逼車)：</strong> 於行駛途中高速緊貼前方車輛尾部，進行惡意逼車、閃燈施壓 (Tailgating)。</p>
+                <p><span class="law-code">CVC 22349(a)</span> <strong>超過最高速限：</strong> 駕駛速度明顯高於該公路標示之法定最高速度限制。</p>
+            </div>
 
-        let airportLayer = L.layerGroup().addTo(map);
-        let historyLayer = L.layerGroup().addTo(map);
-        let vectorLayer = L.layerGroup().addTo(map);
-        let planeLayer = L.layerGroup().addTo(map);
-        
-        let allPilots = [];
-        let trackingTarget = null;
-        let flightHistories = {};
+            <button class="accordion">📕 3. PC - 謀殺、武裝強盜、劫車、綁架與人身武力侵害 (Violent Crimes)</button>
+            <div class="panel">
+                <p><span class="law-code">PC 187</span> <strong>謀殺罪 (Murder)：</strong> 非法、蓄意且具備事先預謀手段剥奪人類生命。</p>
+                <p><span class="law-code">PC 211</span> <strong>強盜強奪罪 (Robbery)：</strong> 面對面利用致命武器、暴力攻擊或言語恐嚇，強行奪取受害者、超商或銀行之財物。</p>
+                <p><span class="law-code">PC 215</span> <strong>武裝劫車罪 (Carjacking)：</strong> 利用槍枝或利刃面對面恐嚇正在車內的駕駛，強行強奪車輛控制權。</p>
+                <p><span class="law-code">PC 245(a)(1)</span> <strong>致命武器攻擊 (ADW)：</strong> 使用火器以外的致命性武器（如球棒、折刀、指虎，或故意開車撞人）攻擊他人。</p>
+                <p><span class="law-code">PC 597</span> <strong>惡意傷害執法警犬 K9：</strong> 在交火、搜捕中，故意開槍擊傷、砍殺執法部門之專職 K9 警犬（加重重罪）。</p>
+            </div>
+        </section>
+    </div>
 
-        const planeSvg = (color) => `<svg viewBox="0 0 512 512" width="20" height="20"><path fill="${color}" d="M448 336v-40L288 192V79.2c0-22.1-17.9-40-40-40s-40 17.9-40 40V192L48 296v40l160-48v113.6l-48 31.2V472l88-24 88 24v-41.2l-48-31.2V288l160 48z"/></svg>`;
+    <!-- ================= 4. SOP 與 10-Codes ================= -->
+    <div id="page-sop" class="tab-content">
+        <section>
+            <h2 class="section-title">洛杉磯常用無線電代碼 (10-Codes)</h2>
+            <div class="table-container">
+                <table class="fine-table">
+                    <thead>
+                        <tr><th>代碼代號</th><th>代表含意 (LA Police Telephony)</th><th>代碼代號</th><th>代表含意 (LA Police Telephony)</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr><td><strong>10-4</strong></td><td>收到 / 明白</td><td><strong>10-23</strong></td><td>抵達現場</td></tr>
+                        <tr><td><strong>10-6</strong></td><td>忙碌中</td><td><strong>10-33</strong></td><td><span class="highlight-red">緊急狀態 / 無線電靜音</span></td></tr>
+                        <tr><td><strong>10-8</strong></td><td>開始值勤 (巡邏中)</td><td><strong>10-80</strong></td><td><span class="highlight-red">車輛追捕中 (Pursuit)</span></td></tr>
+                        <tr><td><strong>10-13</strong></td><td><span class="highlight-red">警員受傷 / 需要緊急支援</span></td><td><strong>Code 4</strong></td><td>狀況解除 / 現場安全</td></tr>
+                    </tbody>
+                </table>
+            </div>
 
-        async function fetchAirports() {
-            try {
-                const res = await fetch('https://raw.githubusercontent.com/mwigg/Airports/master/airports.json');
-                const data = await res.json();
-                data.forEach(ap => {
-                    if (ap.icao) {
-                        const marker = L.circleMarker([ap.lat, ap.lon], {
-                            radius: 3, color: '#2ecc71', fillColor: '#2ecc71', fillOpacity: 0.8, weight: 1
-                        });
-                        marker.bindTooltip(ap.icao, { permanent: true, direction: 'bottom', className: 'airport-label', offset: [0, 5] });
-                        marker.addTo(airportLayer);
-                    }
-                });
-            } catch (e) { console.error("機場載入失敗"); }
-        }
+            <h2 class="section-title">核心重罪基礎罰則對照表</h2>
+            <div class="table-container">
+                <table class="fine-table">
+                    <thead>
+                        <tr><th>法規代碼</th><th>違規 / 犯罪項目</th><th>基礎罰款 (Fine)</th><th>建議刑期 (Jail)</th><th>車輛處置</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr><td><span class="law-code">CVC 23152</span></td><td>酒駕 / 藥駕 (DUI)</td><td>$ 8,000</td><td>10 個月</td><td>強制扣車 30 分鐘</td></tr>
+                        <tr><td><span class="law-code">CVC 2800.2</span></td><td>危險逃避警察追捕 (飛車逃捕)</td><td>$ 15,000</td><td>15 個月</td><td class="highlight-red">直接沒收車輛並銷毀</td></tr>
+                        <tr><td><span class="law-code">PC 211</span></td><td>武裝強盜 / 武裝搶劫</td><td>$ 35,000</td><td>30 個月</td><td class="highlight-red">不得保釋</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+    </div>
 
-        map.on('zoomend', () => {
-            if (map.getZoom() < 5) map.removeLayer(airportLayer);
-            else map.addLayer(airportLayer);
-        });
+    <!-- ================= 5. 招募與測驗 (10題邏輯思考題 + Webhook題目回傳) ================= -->
+    <div id="page-apply" class="tab-content">
+        <section>
+            <h2 class="section-title">洛杉磯聯合警校招募中心</h2>
+            <p style="color: #aaa; margin-bottom: 20px;">本測驗共 10 題，著重於情境邏輯思考與團隊配合觀念。成績與完整題目文本將自動發送至後台審查。</p>
 
-        async function fetchData() {
-            try {
-                const response = await fetch('https://data.vatsim.net/v3/vatsim-data.json');
-                const data = await response.json();
-                allPilots = data.pilots;
-                
-                document.getElementById('count').innerText = allPilots.length;
-                document.getElementById('atc-count').innerText = data.controllers.length;
-                
-                updateAtcList(data.controllers);
-                renderPlanes();
-                
-                if (trackingTarget) {
-                    const target = allPilots.find(p => p.callsign === trackingTarget);
-                    if (target) {
-                        map.panTo([target.latitude, target.longitude]);
-                        showFlightHistory(trackingTarget);
-                    }
-                }
-            } catch (e) { console.error("數據獲取失敗:", e); }
-        }
+            <div class="quiz-box">
+                <!-- 輸入市民名稱 -->
+                <div id="quiz-start-area">
+                    <div class="input-group">
+                        <label for="civilian-name">市民角色名稱 (例如: James_Shelby)：</label>
+                        <input type="text" id="civilian-name" placeholder="請輸入您在伺服器中的角色全名...">
+                    </div>
+                    <button class="btn" onclick="startQuiz()">開始進行司法邏輯測驗</button>
+                </div>
 
-        function updateAtcList(ctrs) {
-            const list = document.getElementById('atc-list');
-            list.innerHTML = ctrs.filter(c => c.facility > 0).map(c => `
-                <div class="atc-item"><b>${c.callsign}</b> <span>${c.frequency}</span></div>
-            `).join('');
-        }
-
-        function getVectorEnd(lat, lon, heading, speed) {
-            const R = 6371;
-            const dist = (speed * 1.852) / 60; 
-            const brng = (heading * Math.PI) / 180;
-            const lat1 = (lat * Math.PI) / 180;
-            const lon1 = (lon * Math.PI) / 180;
-            const lat2 = Math.asin(Math.sin(lat1) * Math.cos(dist / R) + Math.cos(lat1) * Math.sin(dist / R) * Math.cos(brng));
-            const lon2 = lon1 + Math.atan2(Math.sin(brng) * Math.sin(dist / R) * Math.cos(lat1), Math.cos(dist / R) - Math.sin(lat1) * Math.sin(lat2));
-            return [(lat2 * 180) / Math.PI, (lon2 * 180) / Math.PI];
-        }
-
-        function showFlightHistory(callsign) {
-            historyLayer.clearLayers();
-            if (flightHistories[callsign] && flightHistories[callsign].length > 1) {
-                L.polyline(flightHistories[callsign], {
-                    color: '#00d2ff', weight: 2, opacity: 0.8, dashArray: '5, 10', smoothFactor: 1
-                }).addTo(historyLayer);
-            }
-        }
-
-        function renderPlanes() {
-            planeLayer.clearLayers();
-            vectorLayer.clearLayers();
-            const search = document.getElementById('search-box').value.toUpperCase();
-
-            allPilots.forEach(p => {
-                if (!flightHistories[p.callsign]) flightHistories[p.callsign] = [];
-                flightHistories[p.callsign].push([p.latitude, p.longitude]);
-                if (flightHistories[p.callsign].length > 40) flightHistories[p.callsign].shift();
-
-                if (search === "" || p.callsign.includes(search)) {
-                    let trendIcon = "";
-                    if (p.altitude > 100 && Math.abs(p.vertical_speed) > 400) {
-                        trendIcon = p.vertical_speed > 0 ? '<span class="trend-up"> ▲</span>' : '<span class="trend-down"> ▼</span>';
-                    }
-
-                    let color = "#00d2ff";
-                    if (p.altitude > 10000) color = "#f1c40f";
-                    if (p.altitude > 30000) color = "#ffffff";
-
-                    if (p.groundspeed > 40) {
-                        const endPoint = getVectorEnd(p.latitude, p.longitude, p.heading, p.groundspeed);
-                        L.polyline([[p.latitude, p.longitude], endPoint], {
-                            color: color, weight: 1, opacity: 0.5, dashArray: '2, 5'
-                        }).addTo(vectorLayer);
-                    }
-
-                    const icon = L.divIcon({
-                        className: 'plane-icon',
-                        html: `<div style="transform: rotate(${p.heading}deg);">${planeSvg(color)}</div>`,
-                        iconSize: [20, 20], iconAnchor: [10, 10]
-                    });
-
-                    const marker = L.marker([p.latitude, p.longitude], { icon: icon });
-                    
-                    // 彈窗整合機型與 SQK
-                    marker.bindPopup(`
-                        <div style="min-width: 200px;">
-                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px;">
-                                <b style="font-size: 1.2em; color: #00d2ff;">${p.callsign}</b>
-                                <span style="background: #1c2b39; padding: 2px 6px; border-radius: 4px; font-family: monospace; color: #f1c40f; border: 1px solid #34495e;">
-                                    雷達電碼 ${p.transponder}
-                                </span>
-                            </div>
-                            <div style="color: #bdc3c7; font-size: 0.9em; line-height: 1.6;">
-                                機型: <b style="color: white;">${p.flight_plan?.aircraft_short || p.aircraft_short || "---"}</b> ${trendIcon}<br>
-                                高度: <b style="color: white;">${p.altitude.toLocaleString()} ft</b><br>
-                                速度: <b style="color: white;">${p.groundspeed} kt</b>
-                            </div>
-                            <div class="route-box">
-                                ${p.flight_plan?.departure || '??'} ➔ ${p.flight_plan?.arrival || '??'}
-                            </div>
+                <!-- 10 題情境考題 -->
+                <div id="quiz-questions-area">
+                    <!-- Q1 -->
+                    <div class="quiz-item">
+                        <div class="quiz-q" id="q1-text">1. 飛車追捕時嫌犯棄車逃進一條死巷。你是現場唯一的警員，當你追進巷子時，發現嫌犯雙手插在外套口袋裡，背對著你。此時你該怎麼做？</div>
+                        <div class="quiz-options">
+                            <label><input type="radio" name="q1" value="A"> A. 懷疑對方口袋裡藏有槍枝，為了確保自身絕對安全立刻開槍射擊。</label>
+                            <label><input type="radio" name="q1" value="B"> B. 拔槍瞄準並迅速尋找掩體，大聲喝令其「舉起雙手、轉過身來」，同時在無線電呼叫支援。</label>
+                            <label><input type="radio" name="q1" value="C"> C. 認定嫌犯無路可逃，直接衝上去使用警棍敲擊其頭部將其強行壓制。</label>
                         </div>
-                    `);
+                    </div>
 
-                    marker.on('click', () => {
-                        showFlightHistory(p.callsign);
-                        startTracking(p.callsign);
-                    });
+                    <!-- Q2 -->
+                    <div class="quiz-item" style="margin-top:30px;">
+                        <div class="quiz-q" id="q2-text">2. 在高架橋上巡邏時，你目擊前方發生嚴重車禍，有市民卡在著火的車內慘叫，而肇事車輛正加速逃逸。此時無線電損壞，你無法聯絡任何人。你會怎麼做？</div>
+                        <div class="quiz-options">
+                            <label><input type="radio" name="q2" value="A"> A. 生命優先。立刻停車拿取滅火器嘗試救人，並協助現場交通管制防止二次車禍追撞。</label>
+                            <label><input type="radio" name="q2" value="B"> B. 職責至上。加速超越著火車輛，開啟警笛緊追前方肇事逃逸的車輛。</label>
+                            <label><input type="radio" name="q2" value="C"> C. 留在原地用手機拍下現場車禍照片存證，留在原地等待巡邏隊友經過。</label>
+                        </div>
+                    </div>
 
-                    marker.addTo(planeLayer);
-                }
+                    <!-- Q3 -->
+                    <div class="quiz-item" style="margin-top:30px;">
+                        <div class="quiz-q" id="q3-text">3. 你與搭檔正在路邊盤查形跡可疑男子。突然，該男子轉身朝著你的搭檔猛推一拳後拔腿就跑。作為掩護隊員，你的最佳反應為何？</div>
+                        <div class="quiz-options">
+                            <label><input type="radio" name="q3" value="A"> A. 嫌犯涉嫌襲警，立刻拔出配槍向嫌犯背部或腿部射擊以阻止他逃跑。</label>
+                            <label><input type="radio" name="q3" value="B"> B. 先口頭確認搭檔狀況，同時在無線電中清晰播報嫌犯逃跑方向、特徵，隨後展開徒步追捕。</label>
+                            <label><input type="radio" name="q3" value="C"> C. 留在原地指責搭檔警覺度不夠，並站在原地等待附近的其餘巡邏警車前來圍捕。</label>
+                        </div>
+                    </div>
+
+                    <!-- Q4 -->
+                    <div class="quiz-item" style="margin-top:30px;">
+                        <div class="quiz-q" id="q4-text">4. 高級警長在無線電中命令全體警車在某個路口設立攔截防線。當你抵達該路口時，發現你的車身位置最適合堵住路口缺口，你該如何調整警車朝向？</div>
+                        <div class="quiz-options">
+                            <label><input type="radio" name="q4" value="A"> A. 將車身與路口垂直橫放，用最寬的警車側車門直接攔在嫌犯衝撞的方向。</label>
+                            <label><input type="radio" name="q4" value="B"> B. 將車身呈 45 度角斜放，利用引擎室（車頭最堅固且有擋板處）去堵住缺口，並將車門留在安全側作為交火遮蔽掩體。</label>
+                            <label><input type="radio" name="q4" value="C"> C. 為了保護珍貴的警車不被撞壞，把車停在後方平民車輛或牆壁後面躲著。</label>
+                        </div>
+                    </div>
+
+                    <!-- Q5 -->
+                    <div class="quiz-item" style="margin-top:30px;">
+                        <div class="quiz-q" id="q5-text">5. 某位市民因為不滿你開他交通罰單，在現場用極度惡劣、粗鄙的髒話連續辱罵你五分鐘，但其雙手一直高舉在清晰可見的地方，無任何肢體衝突意圖。你該如何應對？</div>
+                        <div class="quiz-options">
+                            <label><input type="radio" name="q5" value="A"> A. 警員威嚴不容侵犯，立刻拿出電擊槍（Taser）將其擊倒並強制逮捕。</label>
+                            <label><input type="radio" name="q5" value="B"> B. 保持冷靜與高水準專業態度，無視言語挑釁，依法開完罰單並宣讀權利後請其離開。</label>
+                            <label><input type="radio" name="q5" value="C"> C. 為了在氣勢上壓制住對方，用同樣粗鄙、大聲的髒話當場痛罵回去。</label>
+                        </div>
+                    </div>
+
+                    <!-- Q6 -->
+                    <div class="quiz-item" style="margin-top:30px;">
+                        <div class="quiz-q" id="q6-text">6. 你收到噪音擾民報案前往住宅。敲門後門開了，你發現客廳沙發上放著三把全自動步槍，屋主慌張地試圖擋住視線。這時你只有單人值勤，該如何處置？</div>
+                        <div class="quiz-options">
+                            <label><input type="radio" name="q6" value="A"> A. 局勢緊迫。立刻拔槍衝進屋內，嘗試將屋主過肩摔制伏並強行搜索。</label>
+                            <label><input type="radio" name="q6" value="B"> B. 不打草驚蛇。假裝只是常規勸導噪音，退回巡邏車安全距離後，立刻無線電呼叫空中支援與大批警力前來包圍。</label>
+                            <label><input type="radio" name="q6" value="C"> C. 當作沒看到，收下屋主塞給你的和解金後直接回總局休息。</label>
+                        </div>
+                    </div>
+
+                    <!-- Q7 -->
+                    <div class="quiz-item" style="margin-top:30px;">
+                        <div class="quiz-q" id="q7-text">7. 執勤時遇到一名新手玩家，他因為不熟悉鍵盤按鍵操作，意外開車失控撞到了你的巡邏車頭。這時從 RP 扮演與社群長久品質出發，何種做法最佳？</div>
+                        <div class="quiz-options">
+                            <label><input type="radio" name="q7" value="A"> A. 認定他是蓄意撞車襲警，屬於重罪犯，立刻呼叫隊友拔槍將其當場擊斃。</label>
+                            <label><input type="radio" name="q7" value="B"> B. 保持包容。在維持 RP 扮演的狀態下口頭訓誡（如：先生請注意安全），並適時給予引導與教導基礎操作與規範。</label>
+                            <label><input type="radio" name="q7" value="C"> C. 覺得非常麻煩且浪費時間，假裝沒看到直接開車離開。</label>
+                        </div>
+                    </div>
+
+                    <!-- Q8 -->
+                    <div class="quiz-item" style="margin-top:30px;">
+                        <div class="quiz-q" id="q8-text">8. 在進行飛車追捕時，你的巡邏車在過彎時失控撞上了路邊電線桿，車頭冒煙受損無法前進。此時另外兩輛隊友的警車正從你身旁經過繼續追捕。你接下來應該？</div>
+                        <div class="quiz-options">
+                            <label><input type="radio" name="q8" value="A"> A. 在無線電中瘋狂大喊並洗頻「我撞車了！救我！」，要求前方的隊友幕僚立刻掉頭回來接你上車。</label>
+                            <label><input type="radio" name="q8" value="B"> B. 保持無線電乾淨。簡短回報「自身代號撞車 10-7，無受傷，追捕由二車接手指揮播報」，隨後聯絡拖吊車與消防單位。</label>
+                            <label><input type="radio" name="q8" value="C"> C. 下車直接徒步橫穿高速公路，嘗試抄捷徑跑到前方路口去攔截嫌犯載具。</label>
+                        </div>
+                    </div>
+
+                    <!-- Q9 -->
+                    <div class="quiz-item" style="margin-top:30px;">
+                        <div class="quiz-q" id="q9-text">9. 你正在參與一場武裝匪徒劫持槍戰。嫌犯此時躲在掩體後盲目開槍，現場有四五名警員已經建立核心防線。作為團隊一員，你應該如何配合？</div>
+                        <div class="quiz-options">
+                            <label><input type="radio" name="q9" value="A"> A. 為了在社群展現身手，獨自一人不拿任何防彈掩體，直接從正面大馬路橫衝過去攻堅。</label>
+                            <label><input type="radio" name="q9" value="B"> B. 與隊友保持交叉火力掩護，由部分人負責火力壓制，其餘人利用掩體逐步包抄嫌犯側翼與逃生路線。</label>
+                            <label><input type="radio" name="q9" value="C"> C. 躲在最遠處安全後方不斷對天空開槍，製造密集的槍聲幫前線開火的隊友加油打氣。</label>
+                        </div>
+                    </div>
+
+                    <!-- Q10 -->
+                    <div class="quiz-item" style="margin-top:30px;">
+                        <div class="quiz-q" id="q10-text">10. 角色扮演 (Roleplay) 在高級企劃中的核心真諦與最終目的是什麼？</div>
+                        <div class="quiz-options">
+                            <label><input type="radio" name="q10" value="A"> A. 贏得每一場警匪對峙與飛車追捕，向所有人證明執法機關是絕對無敵、不可戰勝的。</label>
+                            <label><input type="radio" name="q10" value="B"> B. 透過與社群其他市民、反派玩家的深度互動，共同創造出一段精彩、充滿故事性且雙方都享受其中的 RP 劇情。</label>
+                            <label><input type="radio" name="q10" value="C"> C. 利用規則漏洞賺取大量遊戲幣，購買全伺服器最貴的超級跑車在廣場炫耀。</label>
+                        </div>
+                    </div>
+
+                    <button class="btn" onclick="submitQuiz()">提交考核答案</button>
+                    <p id="quiz-msg" style="color: #f59e0b; margin-top: 15px; display: none; font-weight: bold;">正在傳送答案與題目文本至 Discord，請稍候...</p>
+                </div>
+
+                <!-- 通過測驗後顯示的 Google 表單連結 -->
+                <div id="apply-link-box">
+                    <h3 style="color: white; margin-bottom: 10px;">🎉 考核已順利送出！</h3>
+                    <p style="color: #ccc; margin-bottom: 15px;">我們已收到您的邏輯思維作答紀錄。請點擊下方按鈕填寫最終意願表單：</p>
+                    <div style="display: flex; justify-content: center; gap: 15px; flex-wrap: wrap;">
+                        <a href="#" class="btn" style="background-color: #1e40af; color: #fff;" target="_blank">填寫 LAPD 警察局表單</a>
+                        <a href="#" class="btn" style="background-color: #b45309; color: #fff;" target="_blank">填寫 CHP 公路巡警表單</a>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <footer>
+        <p>&copy; 2026 LOS ANGELES PROJECT. Powered by GitHub Pages. All rights reserved.</p>
+    </footer>
+
+    <!-- JavaScript 核心控制邏輯 -->
+    <script>
+        // 自動綁定你提供的 Discord Webhook 網址
+        const DISCORD_WEBHOOK_URL = "https://discord.com/api/webhooks/1506196677969838232/vlm4XgNq7Pmnz8SGEd2hZiXt70uB7SmwjETcxTecyl-8ZmoQwN0yb1d0oYWlgdeXuN6m";
+
+        // 正確答案清單 (10題皆為B)
+        const correctAnswers = {
+            q1: "B", q2: "A", q3: "B", q4: "B", q5: "B",
+            q6: "B", q7: "B", q8: "B", q9: "B", q10: "B"
+        };
+
+        // 頁籤切換功能
+        function openTab(tabId) {
+            let contents = document.getElementsByClassName("tab-content");
+            for (let i = 0; i < contents.length; i++) { contents[i].classList.remove("active"); }
+            let navs = document.querySelectorAll("nav a");
+            for (let i = 0; i < navs.length; i++) { navs[i].classList.remove("active"); }
+            document.getElementById(tabId).classList.add("active");
+            document.getElementById("nav-" + tabId.replace("page-", "")).classList.add("active");
+            window.scrollTo(0, 0); 
+        }
+
+        // 法規手冊折疊選單機制
+        var acc = document.getElementsByClassName("accordion");
+        for (var i = 0; i < acc.length; i++) {
+            acc[i].addEventListener("click", function() {
+                this.classList.toggle("active-acc");
+                var panel = this.nextElementSibling;
+                if (panel.style.maxHeight) { panel.style.maxHeight = null; } 
+                else { panel.style.maxHeight = panel.scrollHeight + "px"; } 
             });
         }
 
-        function handleSearch(val) {
-            const cs = val.toUpperCase();
-            const target = allPilots.find(p => p.callsign === cs);
-            if (target) {
-                map.setView([target.latitude, target.longitude], 10);
-                showFlightHistory(cs);
-                startTracking(cs);
+        // 開始測驗
+        function startQuiz() {
+            let name = document.getElementById("civilian-name").value.trim();
+            if (name === "") {
+                alert("請先輸入您的市民角色名稱！");
+                return;
             }
+            document.getElementById("quiz-start-area").style.display = "none";
+            document.getElementById("quiz-questions-area").style.display = "block";
         }
 
-        function startTracking(callsign) {
-            trackingTarget = callsign.toUpperCase();
-            document.getElementById('track-info').style.display = 'block';
-            document.getElementById('tracking-callsign').innerText = trackingTarget;
-        }
+        // 提交答案並回傳 Discord Webhook (含題目內容)
+        function submitQuiz() {
+            let name = document.getElementById("civilian-name").value.trim();
+            let score = 0;
+            let totalQuestions = 10;
+            let reportText = "";
 
-        function stopTracking() {
-            trackingTarget = null;
-            document.getElementById('track-info').style.display = 'none';
-            historyLayer.clearLayers();
-        }
+            // 檢查是否每題都寫了，並抓取題目內容與作答情形
+            for (let i = 1; i <= totalQuestions; i++) {
+                let selected = document.querySelector(`input[name="q${i}"]:checked`);
+                if (!selected) {
+                    alert(`您好，第 ${i} 題尚未作答，請完成所有題目再提交！`);
+                    return;
+                }
+                
+                // 抓取網頁上對應題目的文字
+                let questionTitle = document.getElementById(`q${i}-text`).innerText;
+                let ansValue = selected.value;
+                let isCorrect = (ansValue === correctAnswers[`q${i}`]);
+                if (isCorrect) score += 10;
+                
+                // 將題目與作答結果結合成文字報表
+                reportText += `${questionTitle}\n   ➔ 玩家選擇: [${ansValue}] ｜ 考核結果: ${isCorrect ? "🟢 正確" : "❌ 錯誤"}\n\n`;
+            }
 
-        fetchAirports();
-        fetchData();
-        setInterval(fetchData, 30000);
+            document.getElementById("quiz-msg").style.display = "block";
+
+            // 整理發送到 Discord 的數據
+            const payload = {
+                username: "LA Project 司法招生端",
+                avatar_url: "https://images.unsplash.com/photo-1542738738-5537d6ed792b?w=150",
+                embeds: [{
+                    title: "🚨 收到新學員詳細入學考核報告",
+                    color: score >= 80 ? 3066993 : 15158332, // 超過80分綠色，未達紅色
+                    fields: [
+                        { name: "👤 申請人角色名稱", value: `**${name}**`, inline: true },
+                        { name: "📊 考核最終總得分", value: `**${score} / 100 分**`, inline: true },
+                        { name: "📝 完整題目與作答報表", value: `\`\`\`\n${reportText}\`\`\`` }
+                    ],
+                    timestamp: new Date().toISOString()
+                }]
+            };
+
+            // 用 Fetch POST 傳送給你的 Webhook
+            fetch(DISCORD_WEBHOOK_URL, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(payload)
+            })
+            .then(response => {
+                document.getElementById("quiz-questions-area").style.display = "none";
+                document.getElementById("apply-link-box").style.display = "block";
+            })
+            .catch(error => {
+                alert("答案傳送至 Discord 時發生技術錯誤，請聯絡伺服器管理團隊！");
+                console.error(error);
+            });
+        }
     </script>
 </body>
 </html>
