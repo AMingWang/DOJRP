@@ -34,7 +34,7 @@
         .hero p { font-size: 1.1rem; color: #cccccc; max-width: 600px; margin: 0 auto 25px auto; }
 
         /* 首頁公告 */
-        .announcement-box { background-color: #1a1a1a; border-left: 5px solid #f59e0b; padding: 25px; border-radius: 8px; border: 1px solid #333; }
+        .announcement-box { background-color: #1a1a1a; border-left: 5px solid #f59e0b; padding: 25px; border-radius: 8px; margin-bottom: 40px; border: 1px solid #333; }
         .announcement-item { margin-bottom: 15px; padding-bottom: 15px; border-bottom: 1px dashed #333; }
         .announcement-item:last-child { margin-bottom: 0; padding-bottom: 0; border-bottom: none; }
         .announce-date { color: #f59e0b; font-weight: bold; font-size: 0.85rem; margin-bottom: 5px; display: inline-block; background-color: rgba(245, 158, 11, 0.1); padding: 3px 8px; border-radius: 4px; }
@@ -162,37 +162,151 @@
         </section>
     </div>
 
-    <!-- ================= 3. 加州/LA法規全書 ================= -->
+    <!-- ================= 3. 加州/LA法規全書 (130+條完全體重回) ================= -->
     <div id="page-rules" class="tab-content">
         <section style="padding-top: 20px;">
-            <h2 class="section-title">加州法規資料庫 (California Codes)</h2>
-            <p style="color: #aaa; margin-bottom: 30px;">本市執法嚴格遵循加州車輛法規 (CVC)、刑法 (PC) 與健康安全法規 (H&S)。點擊分類可展開查閱詳細條文。</p>
+            <h2 class="section-title">全州法規大全 (California Codes)</h2>
+            <p style="color: #aaa; margin-bottom: 30px;">本資料庫全面實裝。警員與法律人員在司法流程中應完整、精確引用以下法條與代碼。</p>
             
-            <button class="accordion">📘 1. CVC - 車輛牌照與違規改裝處罰 (Admin & Tuning)</button>
+            <!-- 1. CVC 行政與裝備 -->
+            <button class="accordion">📘 1. CVC - 車輛牌照行政與违規改裝處罰 (Admin & Tuning)</button>
             <div class="panel">
                 <p><span class="law-code">CVC 4000(a)(1)</span> <strong>未註冊車輛：</strong> 駕駛未向監理站登記或牌照貼紙過期之車輛上路。</p>
                 <p><span class="law-code">CVC 4454(a)</span> <strong>行車未攜帶行照：</strong> 駕駛機動車輛上路，卻無法當場出示有效的車輛註冊證明文件。</p>
+                <p><span class="law-code">CVC 4463</span> <strong>偽造車牌/年檢標籤：</strong> 惡意偽造、變造、或使用虛假車牌與年檢貼紙意圖矇騙（重罪）。</p>
                 <p><span class="law-code">CVC 5200(a)</span> <strong>未依規定懸掛車牌：</strong> 故意不懸掛前後車牌、或惡意遮蔽車牌規避警方巡邏辨識。</p>
                 <p><span class="law-code">CVC 12500(a)</span> <strong>無照駕駛：</strong> 在未持有合法、有效之加州汽機車駕駛執照的情況下操作機動載具。</p>
-                <p><span class="law-code">CVC 27150</span> <strong>非法改裝直通排氣管：</strong> 故意拆除車輛消音器，或改裝直通管、炸街管，製造巨大爆音與引擎噪音。</p>
+                <p><span class="law-code">CVC 14601.1</span> <strong>駕照吊銷期間行駛：</strong> 明知自身駕駛執照已被依法吊銷或凍結，仍違規強行開車上路。</p>
+                <p><span class="law-code">CVC 16028(a)</span> <strong>未能出示強制保險：</strong> 遭遇警方攔停盤查時，駕駛人無法提供有效的汽車責任保險證明。</p>
+                <p><span class="law-code">CVC 24250</span> <strong>夜間/暗處未開啟車燈：</strong> 於日落後至日出前，或因大霧、隧道內視線不良時，未依規開啟大燈。</p>
+                <p><span class="law-code">CVC 26708</span> <strong>非法車窗隔熱紙：</strong> 汽車前擋風玻璃、或駕駛座兩側車窗，黏貼透光率過低的深色隔熱紙。</p>
+                <p><span class="law-code">CVC 27150</span> <strong>非法改裝直通排氣管：</strong> 故意拆除車輛消音器，或改裝直通管炸街，製造巨大噪音擾民。</p>
+                <p><span class="law-code">CVC 24008</span> <strong>底盤改裝高度違規：</strong> 刻意改裝避震，導致車輛底盤最低點低於輪框下緣，危害安全。</p>
             </div>
 
+            <!-- 2. CVC 行車路權與超速 -->
             <button class="accordion">📘 2. CVC - 行車號誌、超速、路權與危險逼車 (Moving Violations)</button>
             <div class="panel">
                 <p><span class="law-code">CVC 21453(a)</span> <strong>違規闖紅燈：</strong> 面對紅燈號誌未在停止線前完全煞停，強行穿越路口。</p>
+                <p><span class="law-code">CVC 21461(a)</span> <strong>未遵守交通指示標誌：</strong> 無視公路明示之禁止左轉、禁止迴轉、單行道等限制標誌。</p>
                 <p><span class="law-code">CVC 22450(a)</span> <strong>無視停止標誌 (Stop Sign)：</strong> 遇「STOP」標誌未完全將車速歸零靜止至少 3 秒，即滑行通過。</p>
-                <p><span class="law-code">CVC 21651(b)</span> <strong>跨越雙黃線逆向行駛：</strong> 惡意跨越實線分隔島、安全島或公路雙黃線，行駛於對向車道。</p>
-                <p><span class="law-code">CVC 21703</span> <strong>未保持安全距離 (逼車)：</strong> 於行駛途中高速緊貼前方車輛尾部，進行惡意逼車、閃燈施壓 (Tailgating)。</p>
-                <p><span class="law-code">CVC 22349(a)</span> <strong>超過最高速限：</strong> 駕駛速度明顯高於該公路標示之法定最高速度限制。</p>
+                <p><span class="law-code">CVC 21806</span> <strong>未禮讓緊急任務車輛：</strong> 聽聞警笛或看見拉警燈之警網絡車輛時，未立即主動向右靠邊完全停車讓道。</p>
+                <p><span class="law-code">CVC 21651(b)</span> <strong>跨越雙黃線逆向行駛：</strong> 惡意跨越實線分隔島或公路雙黃線，行駛於對向車道。</p>
+                <p><span class="law-code">CVC 21703</span> <strong>未保持安全距離 (逼車)：</strong> 於行駛途中高速緊貼前方車輛尾部，進行惡意逼車施壓 (Tailgating)。</p>
+                <p><span class="law-code">CVC 22348(b)</span> <strong>時速超過 100 英哩：</strong> 於公路上狂飆時速達 100 mph (160 km/h) 以上，執警得當場扣留載具。</p>
+                <p><span class="law-code">CVC 22349(a)</span> <strong>超過該路段最高速限：</strong> 駕駛速度明顯高於該公路標示之法定最高速度限制。</p>
+                <p><span class="law-code">CVC 22350</span> <strong>基本速度法違規 (超速)：</strong> 即使速度未超標，但對當時之大雨或濃霧路況而言屬魯莽超速。</p>
             </div>
 
-            <button class="accordion">📕 3. PC - 謀殺、武裝強盜、劫車、綁架與人身武力侵害 (Violent Crimes)</button>
+            <!-- 3. CVC 危險駕駛與逃避 -->
+            <button class="accordion">📘 3. CVC/H&N - 飛車競速、酒駕毒駕、商業超載與水上船隻法規 (Reckless & DUI)</button>
             <div class="panel">
-                <p><span class="law-code">PC 187</span> <strong>謀殺罪 (Murder)：</strong> 非法、蓄意且具備事先預謀手段剥奪人類生命。</p>
+                <p><span class="law-code">CVC 23103</span> <strong>危險駕駛 (Reckless Driving)：</strong> 在公共道路上肆意燒胎、轉圈甩尾或惡意無序切車，威脅公眾安全。</p>
+                <p><span class="law-code">CVC 23109(a)</span> <strong>非法公路競速 (Street Racing)：</strong> 兩台或多台車輛未經市政機關許可，在街道上進行直線加速競賽。</p>
+                <p><span class="law-code">CVC 23109(c)</span> <strong>非法展示車速：</strong> 故意在人群面前令輪胎劇烈空轉打滑、原地畫圓，藉此製造濃煙炫耀車速。</p>
+                <p><span class="law-code">CVC 23152(a)</span> <strong>酒精影響下駕駛 (DUI)：</strong> 生理受酒精強烈影響，無法進行正常且安全的機動車輛操作。</p>
+                <p><span class="law-code">CVC 23152(f)</span> <strong>毒品/藥物影響下駕駛：</strong> 受管制麻醉藥物、非法毒品或大麻影響致使神智受損行車。</p>
+                <p><span class="law-code">CVC 23153</span> <strong>酒駕/藥駕致人受傷：</strong> 違反 DUI 狀態下駕駛車輛引發交通車禍，導致他人身體受到實質傷害（重罪）。</p>
+                <p><span class="law-code">CVC 2800.1</span> <strong>逃避警方攔停盤查：</strong> 面對後方亮警燈警笛之執法車輛，故意加速逃逸抗拒攔停（輕罪）。</p>
+                <p><span class="law-code">CVC 2800.2</span> <strong>危險飛車逃捕 (重罪)：</strong> 逃捕途中伴隨 3 次以上嚴重交通違規（如連闖紅燈、逆向狂飆）（重罪）。</p>
+                <p><span class="law-code">CVC 2800.4</span> <strong>逆向逃避警方追捕：</strong> 逃避追捕時，故意將車輛駛入設有分隔島之對向車道逆向狂飆，試圖逼退警車。</p>
+                <p><span class="law-code">CVC 20001(a)</span> <strong>肇事逃逸 (人員傷亡)：</strong> 引發導致他人受傷或死亡之車禍後，未實施緊急救助便逃離現場。</p>
+                <p><span class="law-code">CVC 35551</span> <strong>商業重型卡車超載：</strong> 砂石車、大貨車之總承載重量或單軸載重超過該公路、橋樑結構限制。</p>
+                <p><span class="law-code">H&N 655(b)</span> <strong>水上醉酒駕船 (BUI)：</strong> 血液酒精濃度超標之情況下，操作、掌舵任何海上或河道水上載具。</p>
+            </div>
+
+            <!-- 4. PC 暴力犯罪 -->
+            <button class="accordion">📕 4. PC - 謀殺、武裝強盜、劫車、綁架與人身武力侵害 (Violent Crimes)</button>
+            <div class="panel">
+                <p><span class="law-code">PC 187</span> <strong>一級/二級謀殺罪 (Murder)：</strong> 非法、蓄意且具備事先預謀手段(一級)或表現出極度蓄意魯莽無視生命(二級)地剥奪人類生命。</p>
+                <p><span class="law-code">PC 664/187</span> <strong>謀殺未遂 (Attempted Murder)：</strong> 已實施致死性攻擊（開槍射擊、揮刀砍刺），但受害者經急救後存活。</p>
+                <p><span class="law-code">PC 192(a)</span> <strong>故意激情殺人罪：</strong> 因突發激烈爭吵、遭受極大精神刺激導致情緒失控，在完全無事先預謀的情況下當場殺人。</p>
+                <p><span class="law-code">PC 207</span> <strong>一般綁架罪 (Kidnapping)：</strong> 使用實體武力、強迫或恐嚇手段，違反他人意願將其強行移動、帶離至其他地點。</p>
+                <p><span class="law-code">PC 210.5</span> <strong>挾持平民人質抗法：</strong> 遭遇警方防線包圍時，強行將無辜市民、店員扣留作為阻擋警方攻堅之防盾。</p>
                 <p><span class="law-code">PC 211</span> <strong>強盜強奪罪 (Robbery)：</strong> 面對面利用致命武器、暴力攻擊或言語恐嚇，強行奪取受害者、超商或銀行之財物。</p>
-                <p><span class="law-code">PC 215</span> <strong>武裝劫車罪 (Carjacking)：</strong> 利用槍枝或利刃面對面恐嚇正在車內的駕駛，強行強奪車輛控制權。</p>
-                <p><span class="law-code">PC 245(a)(1)</span> <strong>致命武器攻擊 (ADW)：</strong> 使用火器以外的致命性武器（如球棒、折刀、指虎，或故意開車撞人）攻擊他人。</p>
-                <p><span class="law-code">PC 597</span> <strong>惡意傷害執法警犬 K9：</strong> 在交火、搜捕中，故意開槍擊傷、砍殺執法部門之專職 K9 警犬（加重重罪）。</p>
+                <p><span class="law-code">PC 215</span> <strong>武裝劫車罪 (Carjacking)：</strong> 利用槍枝或利刃面對面恐嚇正在車內的駕駛，強行將其驅離並奪取車輛控制權。</p>
+                <p><span class="law-code">PC 236</span> <strong>非法拘禁 (False Imprisonment)：</strong> 非法限制、剝奪他人人身移動自由（例如在搶劫時將店員鎖進倉庫）。</p>
+                <p><span class="law-code">PC 242</span> <strong>非法毆打 (Battery)：</strong> 實際對他人身體進行任何非法、違反意願之暴力武力接觸，造成實質身體傷害。</p>
+                <p><span class="law-code">PC 245(a)(1)</span> <strong>致命武器攻擊 (ADW)：</strong> 使用火器以外的致命性武器（如球棒、折刀、指虎，或故意開車撞人）猛烈攻擊他人。</p>
+                <p><span class="law-code">PC 245(d)(1)</span> <strong>持致命武器襲警：</strong> 持刀、槍枝、致命重物或故意駕車衝撞明知正在執行職務的執警人員。</p>
+                <p><span class="law-code">PC 206</span> <strong>殘忍酷刑罪 (Torture)：</strong> 為了報復或勒索，故意對受害者施加非人道手段，造成極大且持久之肉體痛苦。</p>
+                <p><span class="law-code">PC 422</span> <strong>犯罪恐嚇罪 (Criminal Threats)：</strong> 以言語、文字威脅要殺害或重傷他人，使受害者內心產生合理的極度恐懼。</p>
+            </div>
+
+            <!-- 5. PC 財產犯罪 -->
+            <button class="accordion">📕 5. PC - 入室竊盜、汽車偷竊、偽造文書、金融盜刷與重大洗錢 (Property & Fraud)</button>
+            <div class="panel">
+                <p><span class="law-code">PC 459</span> <strong>住宅/商業入室盜竊 (Burglary)：</strong> 非法潛入封閉住宅、上鎖店鋪或辦公大樓，意圖在內犯下竊盜或重罪。</p>
+                <p><span class="law-code">PC 459.5</span> <strong>入店行竊 (Shoplifting)：</strong> 於正常營業時間內進入商業場所，企圖盜取總價值低於 $950 美元之商品。</p>
+                <p><span class="law-code">PC 466</span> <strong>持有非法盜竊工具：</strong> 非法攜帶開鎖專用工具、撬棍、解碼跳線器，意圖用於侵入或盜竊載具。</p>
+                <p><span class="law-code">PC 487</span> <strong>重大竊盜罪 (Grand Theft)：</strong> 盜取總價值超過 $950 美元的現金或財物；或者不限價值盜取槍枝。</p>
+                <p><span class="law-code">PC 487(d)(1)</span> <strong>重大汽車竊盜 (Grand Theft Auto)：</strong> 未經車主合法授權，惡意撬開車鎖、接線啟動並偷走他人之機動載具。</p>
+                <p><span class="law-code">PC 488</span> <strong>輕微竊盜罪 (Petty Theft)：</strong> 盜取財物、超市商品總價值低於 $950 美元之常規財物犯罪。</p>
+                <p><span class="law-code">PC 496</span> <strong>收受/藏匿贓物罪：</strong> 明知該物品為非法盜竊所得之贓物，仍故意購買、收受、藏匿或在黑市協助銷贓。</p>
+                <p><span class="law-code">PC 503</span> <strong>職務侵占罪 (Embezzlement)：</strong> 欺詐性地挪用、侵吞因工作職務受託管理、持有的公司或公家資金。</p>
+                <p><span class="law-code">PC 470</span> <strong>偽造文書/身分證件 (Forgery)：</strong> 故意偽造他人簽名、使用虛假身分證件 (Fake ID) 意圖欺騙執法人員進行不法圖利。</p>
+                <p><span class="law-code">PC 484e</span> <strong>信用卡/金融卡盜刷：</strong> 非法獲取、持有、或在未經持卡人授權下，強行盜刷他人之銀行金融卡。</p>
+                <p><span class="law-code">PC 186.10</span> <strong>重大洗錢犯罪 (Money Laundering)：</strong> 透過合法空殼公司或交易，試圖將不法犯罪所得轉換為合法資金。</p>
+                <p><span class="law-code">PC 451</span> <strong>故意縱火罪 (Arson)：</strong> 蓄意放火焚燒、引燃任何建築物、住宅、車輛、林地或他人財產。</p>
+                <p><span class="law-code">PC 594</span> <strong>惡意破壞他人財產 (Vandalism)：</strong> 惡意損毀、砸爛、塗鴉、潑漆或破壞公家、私人擁有的實體設備。</p>
+            </div>
+
+            <!-- 6. PC 武器管制 -->
+            <button class="accordion">🔫 6. PC - 非法隱蔽攜槍、重罪犯持槍、黑名單突擊武器與軍用爆裂物 (Weapons Control)</button>
+            <div class="panel">
+                <p><span class="law-code">PC 25400</span> <strong>非法隱蔽攜帶槍枝：</strong> 未持有合法 CCW 持槍證，於衣服內藏匿、置於車輛置物箱、座椅下方攜帶手槍。</p>
+                <p><span class="law-code">PC 25850</span> <strong>公共場所攜帶上膛火器：</strong> 在公共街道、公共廣場或車輛行駛中，隨身攜帶彈匣已上膛、子彈已入膛之火器。</p>
+                <p><span class="law-code">PC 29800</span> <strong>重罪犯非法持有槍枝 (Felon in Possession)：</strong> 曾被宣判過重罪(Felon)之人員，終身嚴禁購買、持有、攜帶任何機動槍枝。</p>
+                <p><span class="law-code">PC 29900</span> <strong>重罪犯非法持有防彈衣：</strong> 具備暴力重罪前科之罪犯，法律明文禁止其購買或穿著任何等級之防彈背心。</p>
+                <p><span class="law-code">PC 30605</span> <strong>持有黑名單突擊武器：</strong> 非法攜帶、運輸或持有未經註冊之全自動突擊步槍、軍用制式步槍或微型衝鋒槍。</p>
+                <p><span class="law-code">PC 32310</span> <strong>持有/銷售大容量彈匣：</strong> 违规持有、進口或黑市製造超過 10 發子彈容量限制之高容量彈匣。</p>
+                <p><span class="law-code">PC 33215</span> <strong>持有改裝鋸短管槍枝：</strong> 違法鋸短霰彈槍管 (Sawed-off) 或非法加裝滅音器等配件。</p>
+                <p><span class="law-code">PC 18710</span> <strong>非法持有軍用爆裂物：</strong> 非法持有、製造 C4 炸藥、管狀炸彈 (Pipe Bomb) 或軍用手榴彈等爆裂裝置。</p>
+                <p><span class="law-code">PC 246</span> <strong>黑夜飛車射擊 (Drive-by Shooting)：</strong> 駕駛載具或乘車時，惡意朝有人居住的房屋大樓或被佔用的車輛開槍開火。</p>
+                <p><span class="law-code">PC 246.3</span> <strong>魯莽對空鳴槍：</strong> 故意且極度魯莽地在市區、公共場合對空鳴槍，造成流彈重傷平民之風險。</p>
+                <p><span class="law-code">PC 417</span> <strong>亮出武器恐嚇 (Brandishing)：</strong> 非出於合法自衛，在他人面前以憤怒、威脅之姿態拔出或展示槍枝刀械。</p>
+            </div>
+
+            <!-- 7. H&S 毒品管制 -->
+            <button class="accordion">🧪 7. H&S - 毒品持有、意圖販賣、非法跨區運輸與地下製毒 (Narcotics)</button>
+            <div class="panel">
+                <p><span class="law-code">H&S 11350</span> <strong>非法持有受控毒品：</strong> 非法隨身攜帶、持有古柯鹼、海洛因、大麻素、冰毒等管制毒品。</p>
+                <p><span class="law-code">H&S 11351</span> <strong>意圖販賣而持有毒品：</strong> 持有大劑量毒品，且伴隨分裝夾鏈袋、微型天平及大量零碎散鈔等證物。</p>
+                <p><span class="law-code">H&S 11352</span> <strong>街頭販賣與非法運輸：</strong> 在街頭與他人實施毒品交易現金買賣，或利用載具跨區、跨州運輸毒品物資。</p>
+                <p><span class="law-code">H&S 11357</span> <strong>持有超額大麻：</strong> 市民隨身攜帶、持有超過加州娛樂合法額度 (28.5克大麻或8克濃縮大麻) 限制之大麻。</p>
+                <p><span class="law-code">H&S 11358</span> <strong>非法大規模種植大麻：</strong> 未獲得州政府頒發之商業執照，私自開闢溫室或於室內大規模種植大麻植株。</p>
+                <p><span class="law-code">H&S 11377</span> <strong>持有甲基安非他命：</strong> 非法持有、攜帶安非他命、冰毒 (Methamphetamine) 等化學合成二級管制毒品。</p>
+                <p><span class="law-code">H&S 11379.6</span> <strong>非法經營地下製毒工廠：</strong> 私自設立秘密實驗室 (Meth Lab) 提煉、製造甲基安非他命等化學毒品（重罪）。</p>
+                <p><span class="law-code">H&S 11364</span> <strong>持有非法吸毒器具：</strong> 隨身藏有專門用於吸食冰毒之球壺、特殊煙斗、或注射針筒等毒品吸食工具。</p>
+                <p><span class="law-code">H&S 11550</span> <strong>受毒品影響神智不清：</strong> 在公共場合處於非法毒品影響狀態之下，表現出精神迷幻、狂躁，危害自身安全。</p>
+            </div>
+
+            <!-- 8. PC 妨礙司法與貪污 -->
+            <button class="accordion">⚖️ 8. PC - 暴力拒捕、提供假身分、虛報警情、公職收賄與竄改MDT紀錄 (Obstruction & Corruption)</button>
+            <div class="panel">
+                <p><span class="law-code">PC 148(a)(1)</span> <strong>一般拒捕妨礙公務：</strong> 故意抵抗逮捕、拔腿阻避追捕、或用言語粗暴阻撓警員執行職務。</p>
+                <p><span class="law-code">PC 69</span> <strong>暴力抵抗執法 (重罪)：</strong> 逮捕過程中與警員猛烈扭打、使用武力抵抗或言語威脅阻止警員執行職務（重罪）。</p>
+                <p><span class="law-code">PC 148.9</span> <strong>向警察提供虛假身分：</strong> 為了逃避通緝、法律責任，故意向盤查警員報假假名、假生日或假身份證號。</p>
+                <p><span class="law-code">PC 148.5</span> <strong>惡意虛報警情 (報假案)：</strong> 明知無事卻故意向調度台報假案（如謊稱有炸彈威脅進行 Swatting 浪費警力）。</p>
+                <p><span class="law-code">PC 67</span> <strong>行賄行政公職人員：</strong> 市民向警員、法官、檢察官提供不法賄金、利益，意圖換取免除刑責。</p>
+                <p><span class="law-code">PC 68</span> <strong>公職人員收受賄賂：</strong> 警員、法官或公務人員利用職權，主動索要、收取犯罪分子提供的賄賂與不法利益（重罪）。</p>
+                <p><span class="law-code">PC 113</span> <strong>非法竄改政府紀錄：</strong> 惡意登入或駭入警用電腦 MDT，惡意竄改、抹除或偽造自身或幫派同夥之犯罪檔案。</p>
+                <p><span class="law-code">PC 118</span> <strong>法庭偽證罪 (Perjury)：</strong> 在法庭審判中宣誓之後，故意提供影響判決、顛倒黑白之虛假證詞。</p>
+                <p><span class="law-code">PC 538d</span> <strong>假冒執法人員：</strong> 私自配戴仿造警徽、穿警服、改裝假警車在市區盤查市民、切車攔停以招搖撞騙。</p>
+                <p><span class="law-code">PC 836.6</span> <strong>逃脫合法羈押：</strong> 被捕上手銬後、關押在警車後座或訊問室時，趁隙破壞鎖頭逃跑或成功脫逃。</p>
+            </div>
+
+            <!-- 9. PC 公共秩序、幫派與特殊法規 -->
+            <button class="accordion">👥 9. PC/FAA/F&G - 幫派加重、傷害K9、低空飛行與非法盜獵 (Public Order & Special Codes)</button>
+            <div class="panel">
+                <p><span class="law-code">PC 186.22</span> <strong>街頭幫派犯罪加重：</strong> 為促進或協助犯罪幫派組織利益而犯下重罪（法官得大幅加重刑期）。</p>
+                <p><span class="law-code">PC 404</span> <strong>煽動/參與暴動罪：</strong> 兩人或以上共同在街頭使用武力暴力，砸毀店家、破壞社會治安。</p>
+                <p><span class="law-code">PC 415</span> <strong>妨害公共安寧：</strong> 在公共場所有殴鬥、故意製造極度不合理之高分貝噪音、或使用粗鄙挑釁言語。</p>
+                <p><span class="law-code">PC 602</span> <strong>非法入侵管制領地：</strong> 未經允許擅自闖入私人土地，或強行侵入機場、軍事基地、LASD 管制區。</p>
+                <p><span class="law-code">PC 597</span> <strong>惡意傷害執法警犬 K9：</strong> 在交火或搜捕中，故意開槍擊傷、砍殺執法部門之專職 K9 警犬（加重重罪）。</p>
+                <p><span class="law-code">PUC 21403</span> <strong>低空危險飛行：</strong> 駕駛航空器（直升機/民航機）在市區上空低於 1000 英呎，危害地面平民安全。</p>
+                <p><span class="law-code">FAA 91.13</span> <strong>粗心與魯莽飛行：</strong> 駕駛飛機穿越高速公路橋下、於大樓間無序穿梭、或未經塔台許可降落於街道。</p>
+                <p><span class="law-code">F&G 2000</span> <strong>非法盜獵野生動物：</strong> 在非合法狩獵季節、在非指定禁獵區進行狩獵，或無照狩獵。</p>
             </div>
         </section>
     </div>
@@ -200,7 +314,33 @@
     <!-- ================= 4. SOP 與 10-Codes ================= -->
     <div id="page-sop" class="tab-content">
         <section style="padding-top: 20px;">
-            <h2 class="section-title">洛杉磯常用無線電代碼 (10-Codes)</h2>
+            <h2 class="section-title">洛杉磯執法部門標準作業程序 (SOP)</h2>
+            <div class="grid-container">
+                <div class="card" style="border-top-color: #1e40af;">
+                    <h3>LAPD 交通攔停程序 (10-11)</h3>
+                    <ul class="sop-list">
+                        <li><span class="sop-highlight">無線電回報：</span> 鳴笛前回報：自身代號（如 1-Adam-12）、當前路名、嫌疑車型與車牌。</li>
+                        <li><span class="sop-highlight">下車尾燈指紋：</span> 下車走近嫌犯車輛時，必須用手觸摸對方車尾燈留下指紋，站位保持在車身 B 柱以確保警戒。</li>
+                    </ul>
+                </div>
+                <div class="card" style="border-top-color: #f59e0b;">
+                    <h3>CHP 高速公路飛車追捕 (10-80)</h3>
+                    <ul class="sop-list">
+                        <li><span class="sop-highlight">車隊限制：</span> 追捕主線最多容許 3 輛警車編隊（首車播報方位、二車掩護）。其餘警車應前往前方交叉路口支援佈設釘刺帶。</li>
+                        <li><span class="sop-highlight">PIT 截停撞擊：</span> 嫌犯車速必須低於 <strong>50 mph (80 km/h)</strong>，周圍無密集平民車流，且獲得高階長官授權方可執行。</li>
+                    </ul>
+                </div>
+                <div class="card" style="border-top-color: #ef4444;">
+                    <h3>武力使用層級與米蘭達警告</h3>
+                    <ul class="sop-list">
+                        <li><span class="sop-highlight">武力升級：</span> 警察展現 ➔ 口頭警告 ➔ 徒手控制 ➔ 低致命武器 (Taser/警棍) ➔ 致命武力 (配槍射擊)。</li>
+                        <li><span class="sop-highlight">洛杉磯米蘭達警告：</span> 逮捕訊問前必須唸出：<br>
+                        <em style="color:#aaa;">「你有權保持緘默。你所說的一切都將在法庭上作為指控你的不利證據。你有權在受審時請律師...」</em></li>
+                    </ul>
+                </div>
+            </div>
+
+            <h2 class="section-title" style="margin-top: 40px;">洛杉磯常用無線電代碼 (10-Codes)</h2>
             <div class="table-container">
                 <table class="fine-table">
                     <thead>
@@ -215,7 +355,7 @@
                 </table>
             </div>
 
-            <h2 class="section-title" style="margin-top: 30px;">核心重罪基礎罰則對照表</h2>
+            <h2 class="section-title" style="margin-top: 40px;">核心重罪基礎罰則對照表</h2>
             <div class="table-container">
                 <table class="fine-table">
                     <thead>
@@ -231,7 +371,7 @@
         </section>
     </div>
 
-    <!-- ================= 5. 招募與測驗 ================= -->
+    <!-- ================= 5. 招募與測驗 (10題邏輯思考題 + Webhook連動) ================= -->
     <div id="page-apply" class="tab-content">
         <section style="padding-top: 20px;">
             <h2 class="section-title">洛杉磯聯合警校招募中心</h2>
@@ -274,7 +414,7 @@
                         <div class="quiz-q" id="q3-text">3. 你與搭檔正在路邊盤查形跡可疑男子。突然，該男子轉身朝著你的搭檔猛推一拳後拔腿就跑。作為掩護隊員，你的最佳反應為何？</div>
                         <div class="quiz-options">
                             <label><input type="radio" name="q3" value="A"> A. 嫌犯涉嫌襲警，立刻拔出配槍向嫌犯背部或腿部射擊以阻止他逃跑。</label>
-                            <label><input type="radio" name="q3" value="B"> B. 先口頭確認搭檔狀況，同時在無線電中清晰播報嫌犯逃跑方向、特徵，隨後展開徒步追捕。</label>
+                            <label><input type="radio" name="q3" value="B"> B. 先口頭確認搭檔狀況，同時在無線電中清晰播報嫌犯逃跑方向、特蹤，隨後展開徒步追捕。</label>
                             <label><input type="radio" name="q3" value="C"> C. 留在原地指責搭檔警覺度不夠，並站在原地等待附近的其餘巡邏警車前來圍捕。</label>
                         </div>
                     </div>
@@ -372,13 +512,16 @@
 
     <!-- JavaScript 核心控制邏輯 -->
     <script>
+        // 自動綁定你提供的 Discord Webhook 網址
         const DISCORD_WEBHOOK_URL = "https://discord.com/api/webhooks/1506196677969838232/vlm4XgNq7Pmnz8SGEd2hZiXt70uB7SmwjETcxTecyl-8ZmoQwN0yb1d0oYWlgdeXuN6m";
 
+        // 正確答案清單 (10題皆為B)
         const correctAnswers = {
             q1: "B", q2: "A", q3: "B", q4: "B", q5: "B",
             q6: "B", q7: "B", q8: "B", q9: "B", q10: "B"
         };
 
+        // 頁籤切換功能
         function openTab(tabId) {
             let contents = document.getElementsByClassName("tab-content");
             for (let i = 0; i < contents.length; i++) { contents[i].classList.remove("active"); }
@@ -389,6 +532,7 @@
             window.scrollTo(0, 0); 
         }
 
+        // 法規手冊折疊選單機制
         var acc = document.getElementsByClassName("accordion");
         for (var i = 0; i < acc.length; i++) {
             acc[i].addEventListener("click", function() {
@@ -399,6 +543,7 @@
             });
         }
 
+        // 開始測驗
         function startQuiz() {
             let name = document.getElementById("civilian-name").value.trim();
             if (name === "") {
@@ -409,6 +554,7 @@
             document.getElementById("quiz-questions-area").style.display = "block";
         }
 
+        // 提交答案並回傳 Discord Webhook (含題目內容)
         function submitQuiz() {
             let name = document.getElementById("civilian-name").value.trim();
             let score = 0;
