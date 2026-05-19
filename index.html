@@ -28,8 +28,13 @@
         .btn { display: inline-block; background-color: #1e40af; color: white; padding: 12px 28px; text-decoration: none; border-radius: 5px; font-weight: bold; transition: 0.3s; border: none; cursor: pointer; margin-top: 15px; }
         .btn:hover { background-color: #1e3a8a; }
 
+        /* 英雄區塊 */
+        .hero { text-align: center; padding: 80px 20px; background: linear-gradient(rgba(18, 18, 18, 0.7), rgba(18, 18, 18, 0.9)), url('https://images.unsplash.com/photo-1542738738-5537d6ed792b?auto=format&fit=crop&w=1920&q=80') center/cover; border-radius: 8px; margin-bottom: 40px; border: 1px solid #333; }
+        .hero h1 { font-size: 3.5rem; color: #ffffff; margin-bottom: 15px; letter-spacing: 1px; }
+        .hero p { font-size: 1.1rem; color: #cccccc; max-width: 600px; margin: 0 auto 25px auto; }
+
         /* 首頁公告 */
-        .announcement-box { background-color: #1a1a1a; border-left: 5px solid #f59e0b; padding: 25px; border-radius: 8px; margin-bottom: 40px; border: 1px solid #333; }
+        .announcement-box { background-color: #1a1a1a; border-left: 5px solid #f59e0b; padding: 25px; border-radius: 8px; border: 1px solid #333; }
         .announcement-item { margin-bottom: 15px; padding-bottom: 15px; border-bottom: 1px dashed #333; }
         .announcement-item:last-child { margin-bottom: 0; padding-bottom: 0; border-bottom: none; }
         .announce-date { color: #f59e0b; font-weight: bold; font-size: 0.85rem; margin-bottom: 5px; display: inline-block; background-color: rgba(245, 158, 11, 0.1); padding: 3px 8px; border-radius: 4px; }
@@ -108,7 +113,7 @@
             <div class="hero">
                 <h1>LOS ANGELES PROJECT</h1>
                 <p>基於真實洛杉磯警政編制與加州司法框架。最高品質的執法、救援與市民 RP 扮演，歡迎來到天使之城。</p>
-                <a href="#" class="btn">加入 LA Project Discord</a>
+                <a onclick="openTab('page-apply')" class="btn">前往警校招募中心</a>
             </div>
             
             <h2 class="section-title">洛杉磯市政公告</h2>
@@ -124,7 +129,7 @@
 
     <!-- ================= 2. 各部門介紹 ================= -->
     <div id="page-depts" class="tab-content">
-        <section>
+        <section style="padding-top: 20px;">
             <h2 class="section-title">洛杉磯公共安全機關編制</h2>
             <p style="color: #aaa; margin-bottom: 30px;">LA Project 擁有高度專業化的核心執法與救援單位，各部門各司其職，緊密合作維持全郡秩序。</p>
 
@@ -159,7 +164,7 @@
 
     <!-- ================= 3. 加州/LA法規全書 ================= -->
     <div id="page-rules" class="tab-content">
-        <section>
+        <section style="padding-top: 20px;">
             <h2 class="section-title">加州法規資料庫 (California Codes)</h2>
             <p style="color: #aaa; margin-bottom: 30px;">本市執法嚴格遵循加州車輛法規 (CVC)、刑法 (PC) 與健康安全法規 (H&S)。點擊分類可展開查閱詳細條文。</p>
             
@@ -194,7 +199,7 @@
 
     <!-- ================= 4. SOP 與 10-Codes ================= -->
     <div id="page-sop" class="tab-content">
-        <section>
+        <section style="padding-top: 20px;">
             <h2 class="section-title">洛杉磯常用無線電代碼 (10-Codes)</h2>
             <div class="table-container">
                 <table class="fine-table">
@@ -210,7 +215,7 @@
                 </table>
             </div>
 
-            <h2 class="section-title">核心重罪基礎罰則對照表</h2>
+            <h2 class="section-title" style="margin-top: 30px;">核心重罪基礎罰則對照表</h2>
             <div class="table-container">
                 <table class="fine-table">
                     <thead>
@@ -226,9 +231,9 @@
         </section>
     </div>
 
-    <!-- ================= 5. 招募與測驗 (10題邏輯思考題 + Webhook題目回傳) ================= -->
+    <!-- ================= 5. 招募與測驗 ================= -->
     <div id="page-apply" class="tab-content">
-        <section>
+        <section style="padding-top: 20px;">
             <h2 class="section-title">洛杉磯聯合警校招募中心</h2>
             <p style="color: #aaa; margin-bottom: 20px;">本測驗共 10 題，著重於情境邏輯思考與團隊配合觀念。成績與完整題目文本將自動發送至後台審查。</p>
 
@@ -367,16 +372,13 @@
 
     <!-- JavaScript 核心控制邏輯 -->
     <script>
-        // 自動綁定你提供的 Discord Webhook 網址
         const DISCORD_WEBHOOK_URL = "https://discord.com/api/webhooks/1506196677969838232/vlm4XgNq7Pmnz8SGEd2hZiXt70uB7SmwjETcxTecyl-8ZmoQwN0yb1d0oYWlgdeXuN6m";
 
-        // 正確答案清單 (10題皆為B)
         const correctAnswers = {
             q1: "B", q2: "A", q3: "B", q4: "B", q5: "B",
             q6: "B", q7: "B", q8: "B", q9: "B", q10: "B"
         };
 
-        // 頁籤切換功能
         function openTab(tabId) {
             let contents = document.getElementsByClassName("tab-content");
             for (let i = 0; i < contents.length; i++) { contents[i].classList.remove("active"); }
@@ -387,7 +389,6 @@
             window.scrollTo(0, 0); 
         }
 
-        // 法規手冊折疊選單機制
         var acc = document.getElementsByClassName("accordion");
         for (var i = 0; i < acc.length; i++) {
             acc[i].addEventListener("click", function() {
@@ -398,7 +399,6 @@
             });
         }
 
-        // 開始測驗
         function startQuiz() {
             let name = document.getElementById("civilian-name").value.trim();
             if (name === "") {
@@ -409,14 +409,12 @@
             document.getElementById("quiz-questions-area").style.display = "block";
         }
 
-        // 提交答案並回傳 Discord Webhook (含題目內容)
         function submitQuiz() {
             let name = document.getElementById("civilian-name").value.trim();
             let score = 0;
             let totalQuestions = 10;
             let reportText = "";
 
-            // 檢查是否每題都寫了，並抓取題目內容與作答情形
             for (let i = 1; i <= totalQuestions; i++) {
                 let selected = document.querySelector(`input[name="q${i}"]:checked`);
                 if (!selected) {
@@ -424,25 +422,22 @@
                     return;
                 }
                 
-                // 抓取網頁上對應題目的文字
                 let questionTitle = document.getElementById(`q${i}-text`).innerText;
                 let ansValue = selected.value;
                 let isCorrect = (ansValue === correctAnswers[`q${i}`]);
                 if (isCorrect) score += 10;
                 
-                // 將題目與作答結果結合成文字報表
                 reportText += `${questionTitle}\n   ➔ 玩家選擇: [${ansValue}] ｜ 考核結果: ${isCorrect ? "🟢 正確" : "❌ 錯誤"}\n\n`;
             }
 
             document.getElementById("quiz-msg").style.display = "block";
 
-            // 整理發送到 Discord 的數據
             const payload = {
                 username: "LA Project 司法招生端",
                 avatar_url: "https://images.unsplash.com/photo-1542738738-5537d6ed792b?w=150",
                 embeds: [{
                     title: "🚨 收到新學員詳細入學考核報告",
-                    color: score >= 80 ? 3066993 : 15158332, // 超過80分綠色，未達紅色
+                    color: score >= 80 ? 3066993 : 15158332, 
                     fields: [
                         { name: "👤 申請人角色名稱", value: `**${name}**`, inline: true },
                         { name: "📊 考核最終總得分", value: `**${score} / 100 分**`, inline: true },
@@ -452,7 +447,6 @@
                 }]
             };
 
-            // 用 Fetch POST 傳送給你的 Webhook
             fetch(DISCORD_WEBHOOK_URL, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
