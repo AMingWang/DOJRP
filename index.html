@@ -34,11 +34,6 @@
         .btn:hover:not(:disabled) { filter: brightness(1.2); }
         .btn:disabled { background-color: #555 !important; cursor: not-allowed; }
 
-        /* 英雄區塊 */
-        .hero { text-align: center; padding: 80px 20px; background: linear-gradient(rgba(18, 18, 18, 0.5), rgba(18, 18, 18, 0.9)); border-radius: 8px; margin-bottom: 40px; border: 1px solid #333; }
-        .hero h1 { font-size: 3.5rem; color: #ffffff; margin-bottom: 15px; letter-spacing: 2px; }
-        .hero p { font-size: 1.1rem; color: #cccccc; max-width: 600px; margin: 0 auto; }
-
         /* 發布面板 (預設隱藏，由 JS 控制顯示) */
         .form-panel { background-color: #161616; border: 1px dashed #4ade80; padding: 25px; border-radius: 6px; margin-bottom: 30px; display: none; animation: fadeIn 0.3s; }
         .form-row { display: flex; gap: 15px; flex-wrap: wrap; margin-bottom: 15px; }
@@ -120,8 +115,6 @@
         /* 匿名與內務舉報箱 */
         .tip-box { background-color: rgba(26,26,26,0.9); border: 1px solid #333; border-radius: 8px; padding: 30px; border-top: 4px solid #f59e0b; margin-top: 40px; }
         .tip-warning-box { background-color: rgba(245, 158, 11, 0.1); border: 1px solid rgba(245, 158, 11, 0.2); padding: 15px; border-radius: 6px; margin-bottom: 25px; color: #fbbf24; font-size: 0.9rem; }
-
-        /* 測驗中心 */
         .quiz-box { background-color: #1e1e1e; padding: 30px; border-radius: 8px; border: 1px solid #333; }
         .quiz-q { margin-bottom: 15px; color: #e0e0e0; font-weight: bold; font-size: 1.1rem; }
         .quiz-options label { display: block; margin-bottom: 10px; color: #aaa; cursor: pointer; padding: 10px; background-color: #121212; border-radius: 4px; border: 1px solid #222; transition: 0.2s; }
@@ -133,18 +126,42 @@
         .close-modal { position: absolute; right: 20px; top: 15px; color: #aaa; font-size: 28px; font-weight: bold; cursor: pointer; }
         .close-modal:hover { color: white; }
         
-        /* 動態權限顯示控制 */
-        .role-admin-only, .role-police-only, .role-judge-only, .role-reporter-only { display: none !important; }
-        body.is-admin .role-admin-only { display: inline-block !important; }
-        body.is-admin .role-admin-flex { display: flex !important; }
-        body.is-police .role-police-only { display: inline-block !important; }
-        body.is-judge .role-judge-only { display: inline-block !important; }
-        body.is-reporter .role-reporter-only { display: inline-block !important; }
+        /* -----------------------------------------------------------------
+           動態權限顯示控制
+           ----------------------------------------------------------------- */
+        .role-admin-only, .role-supervisor-only, .role-police-only, .role-judge-only, .role-reporter-only { display: none; }
+        
+        /* Admin 可以看到所有職業專屬的按鈕與面板 */
+        body.is-admin .role-admin-only,
+        body.is-admin .role-supervisor-only,
+        body.is-admin .role-police-only,
+        body.is-admin .role-judge-only,
+        body.is-admin .role-reporter-only { display: inline-block; }
+        
+        body.is-admin div.role-admin-only,
+        body.is-admin div.role-supervisor-only,
+        body.is-admin div.role-police-only,
+        body.is-admin div.role-judge-only,
+        body.is-admin div.role-reporter-only { display: block; }
+        
+        /* 主管權限 */
+        body.is-supervisor .role-supervisor-only,
+        body.is-supervisor .role-police-only { display: inline-block; }
+        body.is-supervisor div.role-supervisor-only,
+        body.is-supervisor div.role-police-only { display: block; }
+
+        /* 一般職業專屬權限 */
+        body.is-police .role-police-only { display: inline-block; }
+        body.is-police div.role-police-only { display: block; }
+        body.is-judge .role-judge-only { display: inline-block; }
+        body.is-judge div.role-judge-only { display: block; }
+        body.is-reporter .role-reporter-only { display: inline-block; }
+        body.is-reporter div.role-reporter-only { display: block; }
     </style>
 </head>
 <body id="main-body">
 
-    <!-- 頂部導覽列 (完美排序) -->
+    <!-- 頂部導覽列 -->
     <header>
         <div class="logo-area">
             <div class="logo">Los Angeles</div>
@@ -158,9 +175,9 @@
                 <li><a onclick="openTab('page-rules')" id="nav-rules">法規/SOP</a></li>
                 <li><a onclick="openTab('page-bolo')" id="nav-bolo" style="color:#ef4444; font-weight:bold;">BOLO</a></li>
                 <li><a onclick="openTab('page-roster')" id="nav-roster">執法人員名冊</a></li>
-                <li><a onclick="openTab('page-dispatch')" id="nav-dispatch">在線警員</a></li>
                 <li><a onclick="openTab('page-apply')" id="nav-apply">警校招募</a></li>
-                <li><a id="nav-admin" class="role-admin-only" style="background:#991b1b !important;" onclick="openTab('page-admin')">⚙️ 後台管理</a></li>
+                <li><a id="nav-supervisor" class="role-supervisor-only" style="background:#b45309;" onclick="openTab('page-supervisor')">🏢 主管辦公室</a></li>
+                <li><a id="nav-admin" class="role-admin-only" style="background:#991b1b;" onclick="openTab('page-admin')">⚙️ 系統後台</a></li>
                 <li><a id="nav-login" class="nav-login-btn" onclick="openAuthModal()">👤 登入/註冊</a></li>
             </ul>
         </nav>
@@ -169,7 +186,7 @@
     <!-- 登入/註冊 Modal -->
     <div id="auth-modal" class="modal">
         <div class="modal-content">
-            <span class="close-modal" onclick="closeForm('auth-modal')">&times;</span>
+            <span class="close-modal" onclick="UI.closeAllForms()">&times;</span>
             <div id="login-section">
                 <h2 style="margin-bottom:20px; color:#fff;">系統登入</h2>
                 <div class="form-col" style="margin-bottom:15px;"><label>帳號 ID</label><input type="text" id="login-user" placeholder="輸入帳號..."></div>
@@ -186,12 +203,12 @@
                 <div class="form-col" style="margin-bottom:10px;">
                     <label>申請職位身分</label>
                     <select id="reg-role" onchange="toggleRegFields()">
-                        <option value="police">🚓 執法警員</option>
+                        <option value="police">🚓 一般警員</option>
+                        <option value="supervisor">🦅 高階主管 (Command)</option>
                         <option value="judge">⚖️ 司法官員 / 法官</option>
                         <option value="reporter">📰 新聞記者</option>
                     </select>
                 </div>
-                <!-- 動態隱藏區：只有警員需要填寫部門警號 -->
                 <div id="reg-police-fields">
                     <div class="form-col" style="margin-bottom:10px;">
                         <label>所屬部門</label>
@@ -203,7 +220,22 @@
                         </select>
                     </div>
                     <div class="form-col" style="margin-bottom:10px;"><label>警號/徽章號</label><input type="text" id="reg-badge" placeholder="1234"></div>
-                    <div class="form-col" style="margin-bottom:20px;"><label>階級</label><input type="text" id="reg-rank" placeholder="Officer II"></div>
+                    <div class="form-col" style="margin-bottom:20px;">
+                        <label>階級</label>
+                        <select id="reg-rank">
+                            <option value="Cadet (警校生)">Cadet (警校生)</option>
+                            <option value="Officer I (一階警員)">Officer I (一階警員)</option>
+                            <option value="Officer II (二階警員)">Officer II (二階警員)</option>
+                            <option value="Officer III (三階警員)">Officer III (三階警員)</option>
+                            <option value="Sergeant I (一階警佐)">Sergeant I (一階警佐)</option>
+                            <option value="Sergeant II (二階警佐)">Sergeant II (二階警佐)</option>
+                            <option value="Lieutenant (警督)">Lieutenant (警督)</option>
+                            <option value="Captain (警監)">Captain (警監)</option>
+                            <option value="Commander (指揮官)">Commander (指揮官)</option>
+                            <option value="Deputy Chief (副局長)">Deputy Chief (副局長)</option>
+                            <option value="Chief of Police (局長)">Chief of Police (局長)</option>
+                        </select>
+                    </div>
                 </div>
                 <button class="btn" id="btn-reg-submit" style="width:100%; background:#166534; margin-top:0;" onclick="submitRegister()">提交申請 (需管理員核准)</button>
                 <p style="margin-top:15px; text-align:center; font-size:0.85rem;"><a href="#" style="color:#aaa;" onclick="toggleAuthMode()">返回登入</a></p>
@@ -214,20 +246,42 @@
     <!-- 管理員編輯成員 Modal -->
     <div id="edit-user-modal" class="modal">
         <div class="modal-content">
-            <span class="close-modal" onclick="closeForm('edit-user-modal')">&times;</span>
+            <span class="close-modal" onclick="UI.closeAllForms()">&times;</span>
             <h2 style="margin-bottom:20px; color:#f59e0b;">編輯成員資料</h2>
             <input type="hidden" id="edit-uid">
             <div class="form-col" style="margin-bottom:10px;"><label>角色姓名</label><input type="text" id="edit-name"></div>
             <div class="form-col" style="margin-bottom:10px;">
                 <label>職位</label>
-                <select id="edit-role"><option value="police">警員</option><option value="judge">法官</option><option value="reporter">記者</option><option value="admin">管理員</option></select>
+                <select id="edit-role">
+                    <option value="police">警員</option>
+                    <option value="supervisor">高階主管</option>
+                    <option value="judge">法官</option>
+                    <option value="reporter">記者</option>
+                    <option value="admin">管理員</option>
+                </select>
             </div>
             <div class="form-col" style="margin-bottom:10px;">
                 <label>部門</label>
                 <select id="edit-dept"><option value="LAPD">LAPD</option><option value="LASD">LASD</option><option value="CHP">CHP</option><option value="LAFD">LAFD</option><option value="市政府">市府/其他</option></select>
             </div>
             <div class="form-col" style="margin-bottom:10px;"><label>警號</label><input type="text" id="edit-badge"></div>
-            <div class="form-col" style="margin-bottom:10px;"><label>階級</label><input type="text" id="edit-rank"></div>
+            <div class="form-col" style="margin-bottom:10px;">
+                <label>階級</label>
+                <select id="edit-rank">
+                    <option value="">(無/非警員)</option>
+                    <option value="Cadet (警校生)">Cadet (警校生)</option>
+                    <option value="Officer I (一階警員)">Officer I (一階警員)</option>
+                    <option value="Officer II (二階警員)">Officer II (二階警員)</option>
+                    <option value="Officer III (三階警員)">Officer III (三階警員)</option>
+                    <option value="Sergeant I (一階警佐)">Sergeant I (一階警佐)</option>
+                    <option value="Sergeant II (二階警佐)">Sergeant II (二階警佐)</option>
+                    <option value="Lieutenant (警督)">Lieutenant (警督)</option>
+                    <option value="Captain (警監)">Captain (警監)</option>
+                    <option value="Commander (指揮官)">Commander (指揮官)</option>
+                    <option value="Deputy Chief (副局長)">Deputy Chief (副局長)</option>
+                    <option value="Chief of Police (局長)">Chief of Police (局長)</option>
+                </select>
+            </div>
             <div class="form-col" style="margin-bottom:20px;">
                 <label>帳號狀態</label>
                 <select id="edit-status"><option value="approved">✅ 核准 (Approved)</option><option value="pending">⏳ 待審核 (Pending)</option><option value="suspended">⛔ 停職 (Suspended)</option></select>
@@ -239,14 +293,14 @@
     <!-- IAD 處分裁決 Modal -->
     <div id="iad-action-modal" class="modal">
         <div class="modal-content" style="border-color:#ef4444;">
-            <span class="close-modal" onclick="closeForm('iad-action-modal')">&times;</span>
+            <span class="close-modal" onclick="UI.closeAllForms()">&times;</span>
             <h2 style="margin-bottom:20px; color:#ef4444;">⚖️ 內務督察組 裁決面板</h2>
             <input type="hidden" id="iad-case-index">
             <div class="form-col" style="margin-bottom:15px;">
-                <label>處分等級與連動</label>
+                <label>處分等級與連動機制</label>
                 <select id="iad-action-type">
                     <option value="warning">📝 一級：書面申誡 (僅記錄於日誌)</option>
-                    <option value="retrain">📚 二級：強制重新受訓 (要求重考)</option>
+                    <option value="retrain">📚 二級：強制重新受訓 (寫入警告)</option>
                     <option value="suspend">🛑 三級：停職處分 (凍結帳號登入權限)</option>
                     <option value="demote">📉 四級：降級處分 (自動降低一階級)</option>
                     <option value="fire">☠️ 四級：開除 (永久註銷帳號)</option>
@@ -271,10 +325,10 @@
             
             <h2 class="section-title">
                 <span>市政重要公告</span>
-                <button class="btn role-admin-only" style="margin-top:0; padding: 6px 15px; background-color:#ef4444;" onclick="openAnnForm()">➕ 新增公告</button>
+                <button class="btn role-admin-only" onclick="UI.openForm('admin-announcement-form')">➕ 新增公告</button>
             </h2>
             
-            <!-- 表單預設隱藏 (無 role 標籤干擾) -->
+            <!-- 表單面版 -->
             <div class="form-panel" id="admin-announcement-form">
                 <h3 style="color:#4ade80; margin-bottom:15px;" id="ann-form-title">📢 發布公告</h3>
                 <div class="form-row">
@@ -291,12 +345,11 @@
                 </div>
                 <div class="form-row"><div class="form-col"><label>詳細內容</label><textarea id="post-text" rows="4"></textarea></div></div>
                 <button class="btn" id="btn-ann-submit" onclick="submitAnnounce()" style="background:#166534; margin-top:0;">🚀 確認發佈</button>
-                <button class="btn" onclick="closeForm('admin-announcement-form')" style="background:#555; margin-top:0;">收起</button>
+                <button class="btn" onclick="UI.closeAllForms()" style="background:#555; margin-top:0;">收起</button>
             </div>
 
             <div class="list-box" id="area-announcement"><div style="text-align:center; color:#888;">📡 資料同步中...</div></div>
             
-            <!-- 部門介紹 -->
             <h2 class="section-title" style="margin-top:40px;">公共安全機關編制</h2>
             <div class="grid-container">
                 <div class="card dept-card dept-lapd"><span class="badge-title" style="background:rgba(30,58,138,0.2); color:#60a5fa;">LAPD</span><h3>洛杉磯警察局</h3><p style="font-style:italic; color:#888;">"To Protect and to Serve"</p><p>負責市區常規巡邏、重大街頭刑案偵辦。旗下編有交通科、K9 及大名鼎鼎的 SWAT 特種部隊。</p></div>
@@ -334,7 +387,7 @@
         <section style="padding-top: 20px;">
             <h2 class="section-title">
                 <span>📰 洛城警訊 (Weazel News)</span>
-                <button class="btn role-reporter-only role-admin-only" style="margin-top:0; padding:6px 15px; background-color:#1e40af;" onclick="openNewsForm()">➕ 撰寫新聞</button>
+                <button class="btn role-reporter-only" onclick="UI.openForm('news-form')">➕ 撰寫新聞</button>
             </h2>
             
             <div id="news-form" class="form-panel">
@@ -342,7 +395,7 @@
                 <div class="form-row"><div class="form-col"><label>新聞標題</label><input type="text" id="news-title"></div></div>
                 <div class="form-row"><div class="form-col" style="flex:100%;"><label>新聞內文</label><textarea id="news-text" rows="4"></textarea></div></div>
                 <button class="btn" id="btn-news-submit" style="margin-top:0; background-color:#1e40af;" onclick="submitNews()">發佈上網</button>
-                <button class="btn" style="margin-top:0; background-color:#555;" onclick="closeForm('news-form')">收起</button>
+                <button class="btn" style="margin-top:0; background-color:#555;" onclick="UI.closeAllForms()">收起</button>
             </div>
 
             <div class="list-box" id="area-news" style="border-left-color:#60a5fa;"><div style="text-align:center; color:#888;">📡 讀取中...</div></div>
@@ -354,7 +407,7 @@
         <section style="padding-top: 20px;">
             <h2 class="section-title">
                 <span>🏛️ 虛擬司法判決書系統</span>
-                <button class="btn role-judge-only role-admin-only" style="margin-top:0; padding:6px 15px; background-color:#b45309;" onclick="openCourtForm()">➕ 開立判決書</button>
+                <button class="btn role-judge-only" onclick="UI.openForm('court-form')">➕ 開立判決書</button>
             </h2>
             <p style="color: #aaa; margin-bottom: 20px;">本區域為法院公開之裁決書，授權法官及管理員可發布與審理。</p>
             
@@ -369,7 +422,7 @@
                     <div class="form-col" style="flex:100%;"><label>法庭見解說明</label><textarea id="court-reason" rows="3"></textarea></div>
                 </div>
                 <button class="btn" id="btn-court-submit" style="margin-top:0; background-color:#b45309;" onclick="submitCourt()">敲槌判決</button>
-                <button class="btn" style="margin-top:0; background-color:#555;" onclick="closeForm('court-form')">收起</button>
+                <button class="btn" style="margin-top:0; background-color:#555;" onclick="UI.closeAllForms()">收起</button>
             </div>
 
             <div class="list-box" id="area-court"><div style="text-align:center; color:#888;">📡 讀取中...</div></div>
@@ -435,7 +488,7 @@
             <!-- 匿名舉報 -->
             <div class="tip-box" style="margin-top:50px;">
                 <h2 class="section-title" style="border-left-color:#f59e0b; margin-bottom: 10px;">📨 市民匿名檢舉情報信箱</h2>
-                <div class="tip-warning-box">🔒 司法端對端去識別安全聲明：本加密投遞端不紀錄真實 IP，情資直接廣播至內網。</div>
+                <div class="tip-warning-box">🔒 司法端對端去識別安全聲明：本加密投遞端不紀錄真實 IP，情報將直接傳送至警網內部與主管辦公室。</div>
                 <div class="form-row"><div class="form-col"><label>犯罪類型</label><select id="tip-type"><option>重大毒品交易</option><option>軍火走私</option><option>武裝強盜</option><option>非法飆車</option><option>幫派犯罪</option></select></div><div class="form-col"><label>案發地點</label><input type="text" id="tip-loc"></div></div>
                 <div class="form-row"><div class="form-col" style="flex:100%;"><label>嫌疑特徵/車牌</label><input type="text" id="tip-sus"></div><div class="form-col" style="flex:100%;"><label>情報詳情</label><textarea id="tip-txt" rows="3"></textarea></div></div>
                 <button class="btn" id="btn-tip-submit" onclick="submitTip()" style="background:#b45309; width:100%; margin-top:0;">🔒 加密送出情報</button>
@@ -457,7 +510,7 @@
         <section style="padding-top: 20px;">
             <h2 class="section-title">
                 <span>🚨 全州通緝 (BOLO)</span>
-                <button class="btn role-police-only role-admin-only" style="margin-top: 0; padding: 6px 15px; background-color:#ef4444;" onclick="openBoloForm()">➕ 發布通緝</button>
+                <button class="btn role-police-only" onclick="UI.openForm('bolo-form-container')">➕ 發布通緝</button>
             </h2>
 
             <div id="bolo-form-container" class="form-panel">
@@ -481,10 +534,12 @@
                     <div class="form-col"><label>特徵描述</label><input type="text" id="bolo-desc"></div>
                     <div class="form-col"><label>涉犯法條</label><input type="text" id="bolo-law"></div>
                 </div>
-                <div class="form-row"><div class="form-col"><label>行動指示</label><input type="text" id="bolo-action"></div></div>
-                <div class="form-row"><div class="form-col"><label>嫌犯照片 URL</label><input type="text" id="bolo-img" placeholder="https://..."></div></div>
+                <div class="form-row">
+                    <div class="form-col" style="flex:100%;"><label>行動指示</label><input type="text" id="bolo-action"></div>
+                    <div class="form-col" style="flex:100%;"><label>嫌犯照片 URL</label><input type="text" id="bolo-img" placeholder="https://..."></div>
+                </div>
                 <button class="btn" id="btn-bolo-submit" style="margin-top:0; background-color: #ef4444;" onclick="submitBolo()">🚨 發布通緝</button>
-                <button class="btn" style="margin-top:0; background-color: #555;" onclick="closeForm('bolo-form-container')">收起</button>
+                <button class="btn" style="margin-top:0; background-color: #555;" onclick="UI.closeAllForms()">收起</button>
             </div>
 
             <div class="bolo-grid" id="area-bolo"><div style="text-align:center; color:#888; width:100%;">📡 讀取中...</div></div>
@@ -504,27 +559,7 @@
         </section>
     </div>
 
-    <!-- ================= 7. 在線警員 ================= -->
-    <div id="page-dispatch" class="tab-content">
-        <section style="padding-top: 20px;">
-            <h2 class="section-title">📡 勤務調度系統 (CAD)</h2>
-            <p style="color: #aaa; margin-bottom: 20px;">警力名單每 5 秒靜默同步，無須手動重新整理。</p>
-
-            <div class="role-police-only role-admin-only" style="margin-bottom: 25px;">
-                <button class="btn" id="btn-clock-in" style="background-color: #166534; margin-top:0;" onclick="clockIn()">🟢 10-8 開始值勤 (上線)</button>
-                <button class="btn" id="btn-clock-out" style="background-color: #991b1b; margin-top:0;" onclick="clockOut()">🔴 10-7 結束值勤 (下線)</button>
-            </div>
-
-            <div class="grid-container" style="grid-template-columns: 1fr;">
-                <div class="card" style="border-top-color: #4ade80;">
-                    <h3 style="color:#4ade80;">🟢 目前上線值勤中警力</h3>
-                    <div id="area-roster" style="margin-top: 15px; display:flex; flex-direction:column; gap:8px;"><div style="color:#888;">讀取中...</div></div>
-                </div>
-            </div>
-        </section>
-    </div>
-
-    <!-- ================= 8. 警校招募 ================= -->
+    <!-- ================= 7. 警校招募 ================= -->
     <div id="page-apply" class="tab-content">
         <section style="padding-top: 20px;">
             <h2 class="section-title">警校邏輯測驗中心</h2>
@@ -568,7 +603,7 @@
                     <div class="quiz-options"><label><input type="radio" name="q9" value="A"> A. 獨自從大馬路正面衝鋒。</label><label><input type="radio" name="q9" value="B"> B. 保持交叉火力，部分壓制部分包抄。</label><label><input type="radio" name="q9" value="C"> C. 躲在遠處對空鳴槍幫忙打氣。</label></div></div>
 
                     <div class="quiz-item" style="margin-top:20px;"><div class="quiz-q">10. RP (角色扮演) 在企劃中的核心真諦是？</div>
-                    <div class="quiz-options"><label><input type="radio" name="q10" value="A"> A. 贏得每場追捕。</label><label><input type="radio" name="q10" value="B"> B. 創造精彩互動劇情。</label><label><input type="radio" name="q10" value="C"> C. 找漏洞賺錢。</label></div></div>
+                    <div class="quiz-options"><label><input type="radio" name="q10" value="A"> A. 贏得每場追捕證明警局無敵。</label><label><input type="radio" name="q10" value="B"> B. 創造精彩互動劇情，雙方享受過程。</label><label><input type="radio" name="q10" value="C"> C. 找漏洞賺錢買超跑。</label></div></div>
                     
                     <button class="btn" id="btn-quiz-submit" style="margin-top:25px; background-color:#1e40af;" onclick="submitQuiz()">送出考核答案</button>
                 </div>
@@ -581,10 +616,46 @@
         </section>
     </div>
 
-    <!-- ================= 9. 管理後台 (ADMIN ONLY) ================= -->
+    <!-- ================= 8. 主管辦公室 (SUPERVISOR ONLY) ================= -->
+    <div id="page-supervisor" class="tab-content">
+        <section style="padding-top: 20px;">
+            <h2 class="section-title" style="color:#f59e0b; border-left-color:#f59e0b;">🏢 高階主管辦公室 (Command & Staff)</h2>
+            <p style="color:#aaa; margin-bottom:20px;">此區域專供警務高層進行人事調動、情報分析與內務裁決。</p>
+            
+            <div class="grid-container" style="grid-template-columns: 1fr;">
+                
+                <!-- 1. 情報接收端 (移動至此) -->
+                <div class="card" style="border-top-color: #4ade80;">
+                    <h3 style="color:#4ade80;">📨 警網內部：市民情報接收端</h3>
+                    <p style="color:#aaa; font-size:0.85rem; margin-bottom:15px;">即時接收來自市民的匿名線索。可由主管或管理員進行審閱與刪除。</p>
+                    <div id="area-tips" style="max-height: 400px; overflow-y: auto;"><div style="color:#888;">讀取中...</div></div>
+                </div>
+
+                <!-- 2. 人事考核 -->
+                <div class="card" style="border-top-color: #f59e0b;">
+                    <h3>📋 警局人事與階級管理</h3>
+                    <div style="overflow-x: auto;">
+                        <table class="data-table" id="supervisor-roster-table">
+                            <thead><tr><th>部門</th><th>警號</th><th>姓名</th><th>當前階級</th><th>人事操作</th></tr></thead>
+                            <tbody><tr><td colspan="5" style="text-align:center; color:#888;">讀取中...</td></tr></tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- 3. 內務督察 -->
+                <div class="card" style="border-top-color: #1e40af;">
+                    <h3>🛡️ 內務督察 (IAD) 案件審核</h3>
+                    <div id="supervisor-iad-cases"><div style="text-align:center; color:#888;">讀取中...</div></div>
+                </div>
+
+            </div>
+        </section>
+    </div>
+
+    <!-- ================= 9. 系統管理後台 (ADMIN ONLY) ================= -->
     <div id="page-admin" class="tab-content">
         <section style="padding-top: 20px;">
-            <h2 class="section-title" style="color:#ef4444; border-left-color:#ef4444;">⚙️ 系統管理後台 (IAD)</h2>
+            <h2 class="section-title" style="color:#ef4444; border-left-color:#ef4444;">⚙️ 系統管理後台 (SysAdmin)</h2>
             <div class="grid-container" style="grid-template-columns: 1fr;">
                 
                 <div class="card" style="border-top-color: #1e40af;">
@@ -613,18 +684,36 @@
 
     <!-- ================= JavaScript 核心邏輯 ================= -->
     <script>
-        // Webhooks & API
+        // --- 終極核心：強制控制所有 UI 收納的控制器 ---
+        const UI = {
+            closeAllForms: function() {
+                document.querySelectorAll('.form-panel').forEach(panel => {
+                    panel.style.display = 'none';
+                });
+                document.querySelectorAll('.modal').forEach(modal => {
+                    modal.style.display = 'none';
+                });
+            },
+            openForm: function(id) {
+                this.closeAllForms(); // 打開新表單前，先殺死所有開啟的表單
+                document.getElementById(id).style.display = 'block';
+            }
+        };
+
+        // --- Webhooks & API ---
         const RECRUIT_WEBHOOK_URL = "https://discord.com/api/webhooks/1506196677969838232/vlm4XgNq7Pmnz8SGEd2hZiXt70uB7SmwjETcxTecyl-8ZmoQwN0yb1d0oYWlgdeXuN6m";
         const ANONYMOUS_TIP_WEBHOOK_URL = "https://discord.com/api/webhooks/1506542930486362134/czetEiPxrvaxzo7lDNgwUeI-y-pYbm4Ny6NGRqNPOjhlOrNOnld6z_A1H97u3RmISKaE"; 
         const CLOUD_API_URL = "https://script.google.com/macros/s/AKfycbwPuG2Vv7gOdPMtPv9jymzavc91HLA0crUmJOR5wUVn3P340jzAwZ5i8QmJdramLFnl/exec";
         
-        let appData = { announcements: [], bolos: [], roster: [], logs: [], court: [], news: [], users: {}, iad: [] };
+        let appData = { announcements: [], bolos: [], roster: [], logs: [], court: [], news: [], tips: [], users: {}, iad: [] };
         let currentUser = sessionStorage.getItem("currentUser") || "";
         let lastHash = "";
         let isSyncing = false; 
 
-        // 編輯索引紀錄
         let editAnnIdx = -1, editBoloIdx = -1, editCourtIdx = -1, editNewsIdx = -1;
+
+        // IAD 自動降級的階級表
+        const RANK_HIERARCHY = ["Cadet (警校生)", "Officer I (一階警員)", "Officer II (二階警員)", "Officer III (三階警員)", "Sergeant I (一階警佐)", "Sergeant II (二階警佐)", "Lieutenant (警督)", "Captain (警監)", "Commander (指揮官)", "Deputy Chief (副局長)", "Chief of Police (局長)"];
 
         const LAW_DB = [
             { c:"CVC 4000(a)(1)", n:"未註冊車輛", f:1500, j:0, t:1 }, { c:"CVC 4454(a)", n:"未帶行照", f:800, j:0, t:1 },
@@ -680,19 +769,11 @@
             setTimeout(updateLATime, 1000);
         }
 
-        // 強制隱藏所有表單
-        function hideAllForms() { document.querySelectorAll('.form-panel').forEach(f => f.style.display = 'none'); }
-        function closeForm(id) { document.getElementById(id).style.display = 'none'; }
-        function toggleForm(id) {
-            let el = document.getElementById(id);
-            if(el.style.display === "block") { el.style.display = "none"; }
-            else { hideAllForms(); el.style.display = "block"; } // 切換時自動收起其他表單
-        }
-
+        // --- 點擊切換頁籤：強制關閉表單 ---
         function openTab(tabId) {
             document.querySelectorAll(".tab-content").forEach(el => el.classList.remove("active"));
             document.querySelectorAll("nav a").forEach(el => el.classList.remove("active"));
-            hideAllForms(); // 切換頁籤強制收起所有表單
+            UI.closeAllForms(); // 頁籤切換時，確保 UI 乾淨
             document.getElementById(tabId).classList.add("active");
             if(document.getElementById("nav-" + tabId.replace("page-", ""))) document.getElementById("nav-" + tabId.replace("page-", "")).classList.add("active");
             window.scrollTo(0, 0); 
@@ -701,10 +782,9 @@
         // --- 登入註冊 ---
         function toggleRegFields() {
             let role = document.getElementById("reg-role").value;
-            document.getElementById("reg-police-fields").style.display = role === "police" ? "block" : "none";
+            document.getElementById("reg-police-fields").style.display = (role === "police" || role === "supervisor") ? "block" : "none";
         }
-        function openAuthModal() { if(currentUser){ if(confirm("確定登出嗎？")) logout(); } else document.getElementById('auth-modal').style.display='block'; }
-        function closeAuthModal() { document.getElementById('auth-modal').style.display='none'; }
+        function openAuthModal() { if(currentUser){ if(confirm("確定登出嗎？")) logout(); } else UI.openForm('auth-modal'); }
         function toggleAuthMode() {
             let l = document.getElementById('login-section'); let r = document.getElementById('register-section');
             l.style.display = l.style.display === 'none' ? 'block' : 'none';
@@ -726,13 +806,16 @@
             if(appData.users[user] || user === "ADMIN") return alert("ID 已使用！");
 
             let btn = document.getElementById("btn-reg-submit"); btn.disabled = true; btn.innerText = "提交中...";
-            appData.users[user] = { pwd:pass, name:name, role:role, dept: role==="police"?document.getElementById("reg-dept").value:"", badge: role==="police"?document.getElementById("reg-badge").value:"", rank: role==="police"?document.getElementById("reg-rank").value:"", status: "pending" };
+            let isPolice = (role === "police" || role === "supervisor");
+            appData.users[user] = { pwd:pass, name:name, role:role, dept: isPolice?document.getElementById("reg-dept").value:"", badge: isPolice?document.getElementById("reg-badge").value:"", rank: isPolice?document.getElementById("reg-rank").value:"", status: "pending" };
             sysLog(`新註冊: ${user} (${role})`);
             saveToCloud().then(() => { alert("註冊成功！待核准。"); toggleAuthMode(); }).finally(() => { btn.disabled = false; btn.innerText = "提交申請"; });
         }
 
-        function loginSuccess(user) { currentUser=user; sessionStorage.setItem("currentUser", user); sysLog(`登入`); saveToCloud(); applyAuthUI(); closeAuthModal(); alert(`歡迎 ${user}`); renderAll(); }
-        function logout() { if(appData.roster.includes(currentUser)) clockOut(); sysLog(`登出`); saveToCloud(); currentUser=""; sessionStorage.removeItem("currentUser"); applyAuthUI(); renderAll(); openTab('page-home'); }
+        function loginSuccess(user) { currentUser=user; sessionStorage.setItem("currentUser", user); sysLog(`登入`); saveToCloud(); applyAuthUI(); UI.closeAllForms(); alert(`歡迎 ${user}`); renderAll(); }
+        
+        // 修改登出功能：移除了在線警員打卡功能，僅需清除 sessionStorage 即可
+        function logout() { sysLog(`登出`); saveToCloud(); currentUser=""; sessionStorage.removeItem("currentUser"); applyAuthUI(); renderAll(); openTab('page-home'); }
 
         function applyAuthUI() {
             let role = currentUser === "ADMIN" ? "admin" : (appData.users[currentUser]?.role || "guest");
@@ -745,120 +828,201 @@
             fetch(CLOUD_API_URL).then(r=>r.text()).then(txt=>{
                 if(txt === lastHash || !txt) return;
                 lastHash = txt; let d = JSON.parse(txt);
-                appData.announcements = d.announcements||[]; appData.bolos = d.bolos||[]; appData.roster = d.roster||[]; appData.logs = d.logs||[]; appData.court = d.court||[]; appData.news = d.news||[]; appData.users = d.users||{}; appData.iad = d.iad||[]; 
+                appData.announcements = d.announcements||[]; appData.bolos = d.bolos||[]; appData.roster = d.roster||[]; appData.logs = d.logs||[]; appData.court = d.court||[]; appData.news = d.news||[]; appData.tips = d.tips||[]; appData.users = d.users||{}; appData.iad = d.iad||[]; 
                 renderAll();
             }).catch(e=>{});
         }
         function saveToCloud() { isSyncing = true; let p = JSON.stringify(appData); lastHash = p; return fetch(CLOUD_API_URL, {method:"POST", body:p}).then(r=>r.text()).finally(()=>{isSyncing = false;}); }
         function sysLog(msg) { let d = new Date().toLocaleString("en-US",{timeZone:"America/Los_Angeles"}); appData.logs.unshift(`[${d}] [${currentUser||'SYS'}] ${msg}`); if(appData.logs.length>50) appData.logs.pop(); }
 
+        // --- 主管專用操作：升階、降階、停職、復職 ---
+        function supPromote(u) {
+            let acc = appData.users[u];
+            let rIdx = RANK_HIERARCHY.indexOf(acc.rank);
+            if(rIdx < RANK_HIERARCHY.length - 1) {
+                acc.rank = RANK_HIERARCHY[rIdx + 1];
+                if(acc.status === 'suspended') acc.status = 'approved';
+                sysLog(`[人事命令] 主管將 ${u} 升階為 ${acc.rank}`);
+                renderAll(); saveToCloud(); alert(`已將 ${acc.name} 升階為 ${acc.rank}`);
+            } else { alert("已是最高階級！"); }
+        }
+        function supDemote(u) {
+            let acc = appData.users[u];
+            let rIdx = RANK_HIERARCHY.indexOf(acc.rank);
+            if(rIdx > 0) {
+                acc.rank = RANK_HIERARCHY[rIdx - 1];
+                sysLog(`[人事命令] 主管將 ${u} 降階為 ${acc.rank}`);
+                renderAll(); saveToCloud(); alert(`已將 ${acc.name} 降階為 ${acc.rank}`);
+            } else { alert("已是最低階級！"); }
+        }
+        function supSuspend(u) {
+            if(confirm(`確定要將 ${appData.users[u].name} 停職嗎？`)) {
+                appData.users[u].status = 'suspended';
+                sysLog(`[人事命令] 主管將 ${u} 停職`);
+                renderAll(); saveToCloud(); alert(`已將 ${appData.users[u].name} 停職！`);
+            }
+        }
+        function supRestore(u) {
+            if(confirm(`確定要讓 ${appData.users[u].name} 恢復原職嗎？`)) {
+                appData.users[u].status = 'approved';
+                sysLog(`[人事命令] 主管將 ${u} 復職`);
+                renderAll(); saveToCloud(); alert(`已將 ${appData.users[u].name} 復職！`);
+            }
+        }
+
+        // --- 刪除市民情報 ---
+        function delTip(i) {
+            if(confirm("確定刪除此線索？")) {
+                sysLog("刪除了一則情報線索");
+                appData.tips.splice(i, 1);
+                renderAll();
+                saveToCloud();
+            }
+        }
+
         // --- 渲染 UI ---
         function renderAll() {
             let isAdmin = (currentUser === "ADMIN"), role = isAdmin ? "admin" : (appData.users[currentUser]?.role || "guest");
             
-            // 公告
             document.getElementById("area-announcement").innerHTML = appData.announcements.map((a,i)=>`<div class="list-item"><div style="display:flex; justify-content:space-between;"><div><div class="item-tag">${a.tag}</div><div class="item-title">${a.title}</div></div><div>${isAdmin?`<button class="btn" style="background:#f59e0b; padding:2px 8px; font-size:0.7rem;" onclick="editAnn(${i})">✏️</button><button class="btn" style="background:#991b1b; padding:2px 8px; font-size:0.7rem;" onclick="delAnn(${i})">🗑️</button>`:""}</div></div><div class="item-text">${a.text}</div></div>`).join("") || "<p style='color:#888; text-align:center;'>無公告</p>";
-            // BOLO
-            document.getElementById("area-bolo").innerHTML = appData.bolos.map((b,i)=>`<div class="bolo-card"><div class="bolo-header ${b.level==='red'?'bolo-red':(b.level==='yellow'?'bolo-yellow':'bolo-blue')}"><span>WANTED</span><div>${(isAdmin||role==="police")?`<span onclick="editBolo(${i})" style="cursor:pointer; background:#f59e0b; color:000; padding:2px 5px; border-radius:3px; font-size:0.8rem;">✏️</span><span onclick="delBolo(${i})" style="cursor:pointer; background:#fff; color:red; padding:2px 5px; border-radius:3px; margin-left:5px; font-size:0.8rem;">🗑️</span>`:""}</div></div><img src="${b.imgUrl}" class="bolo-img"><div class="bolo-body"><div class="bolo-title">${b.title}</div><div class="bolo-detail"><div class="bolo-detail-label">目標：</div>${b.target}</div><div class="bolo-detail"><div class="bolo-detail-label">車牌：</div>${b.plate}</div><div class="bolo-detail"><div class="bolo-detail-label">法條：</div>${b.law}</div></div><div class="bolo-footer">⚠️ ${b.action}<br>發布: ${b.officer}</div></div>`).join("") || "<p style='color:#888; width:100%; text-align:center;'>無通緝</p>";
-            // Roster
-            document.getElementById("area-roster").innerHTML = appData.roster.map(u=>`<div style="padding:10px; background:#1a1a1a; border-radius:4px; margin-bottom:5px; border-left:4px solid #4ade80;">👮 ${u} <span style="float:right; color:#4ade80;">上線值勤中</span></div>`).join("") || "<p style='color:#888;'>無警力</p>";
-            let rTb = ""; for(let k in appData.users){ let u=appData.users[k]; if(u.status==='approved' && u.role==='police') rTb+=`<tr><td>${u.dept}</td><td>${u.rank}</td><td>${u.name}</td><td>${k} (#${u.badge})</td></tr>`; }
+            
+            document.getElementById("area-bolo").innerHTML = appData.bolos.map((b,i)=>`<div class="bolo-card"><div class="bolo-header ${b.level==='red'?'bolo-red':(b.level==='yellow'?'bolo-yellow':'bolo-blue')}"><span>WANTED</span><div>${(isAdmin||role==="police"||role==="supervisor")?`<span onclick="editBolo(${i})" style="cursor:pointer; background:#f59e0b; color:000; padding:2px 5px; border-radius:3px; font-size:0.8rem;">✏️</span><span onclick="delBolo(${i})" style="cursor:pointer; background:#fff; color:red; padding:2px 5px; border-radius:3px; margin-left:5px; font-size:0.8rem;">🗑️</span>`:""}</div></div><img src="${b.imgUrl}" class="bolo-img"><div class="bolo-body"><div class="bolo-title">${b.title}</div><div class="bolo-detail"><div class="bolo-detail-label">目標：</div>${b.target}</div><div class="bolo-detail"><div class="bolo-detail-label">車牌：</div>${b.plate}</div><div class="bolo-detail"><div class="bolo-detail-label">法條：</div>${b.law}</div></div><div class="bolo-footer">⚠️ ${b.action}<br>發布: ${b.officer}</div></div>`).join("") || "<p style='color:#888; width:100%; text-align:center;'>無通緝</p>";
+            
+            // 渲染情報接收端 (如果該元素存在的話，即在主管辦公室內)
+            if(document.getElementById("area-tips")) {
+                document.getElementById("area-tips").innerHTML = appData.tips.map((t,i)=>`<div style="background:#1a1a1a; border-left:4px solid #f59e0b; padding:10px; margin-bottom:10px; border-radius:4px;"><div style="color:#f59e0b; font-size:0.8rem; font-weight:bold;">🕒 ${t.date} | [${t.type}]</div><div style="font-size:0.9rem; margin-top:5px;"><span style="color:#888;">📍 地點:</span> ${t.loc}</div><div style="font-size:0.9rem;"><span style="color:#888;">👤 特徵:</span> ${t.sus}</div><div style="font-size:0.95rem; margin-top:5px; color:#ddd; white-space:pre-wrap;">${t.txt}</div>${isAdmin?`<button onclick="delTip(${i})" style="margin-top:8px; background:#991b1b; border:none; color:white; padding:4px 8px; border-radius:3px; cursor:pointer; font-size:0.75rem;">🗑️ 刪除線索</button>`:''}</div>`).join("") || "<p style='color:#888;'>目前無最新情報</p>";
+            }
+
+            let rTb = ""; for(let k in appData.users){ let u=appData.users[k]; if(u.status==='approved' && (u.role==='police' || u.role==='supervisor')) rTb+=`<tr><td>${u.dept}</td><td>${u.rank}</td><td>${u.name}</td><td>${k} (#${u.badge})</td></tr>`; }
             document.querySelector("#table-roster tbody").innerHTML = rTb || "<tr><td colspan='4' style='text-align:center;'>無資料</td></tr>";
-            // Admin
+
+            // 主管辦公室 (Supervisor & Admin)
+            if(role === 'supervisor' || isAdmin) {
+                let sTb = "";
+                for(let k in appData.users){
+                    let u = appData.users[k];
+                    if((u.role === 'police' || u.role === 'supervisor') && u.status !== 'pending') {
+                        let actionBtns = `
+                            <button onclick="supPromote('${k}')" class="btn" style="background:#166534; padding:2px 8px; font-size:0.75rem; margin:0;">🎖️ 升階</button>
+                            <button onclick="supDemote('${k}')" class="btn" style="background:#b45309; padding:2px 8px; font-size:0.75rem; margin:0;">📉 降階</button>
+                        `;
+                        // 動態判斷是顯示停職還是復職
+                        if (u.status === 'suspended') {
+                            actionBtns += `<button onclick="supRestore('${k}')" class="btn" style="background:#2563eb; padding:2px 8px; font-size:0.75rem; margin:0;">🟢 復職</button>`;
+                        } else {
+                            actionBtns += `<button onclick="supSuspend('${k}')" class="btn" style="background:#991b1b; padding:2px 8px; font-size:0.75rem; margin:0;">🛑 停職</button>`;
+                        }
+
+                        sTb += `<tr><td>${u.dept}</td><td>${u.badge}</td><td>${u.name}</td><td><span style="color:${u.status==='suspended'?'#ef4444':'#fff'}">${u.status==='suspended'?'(停職) ':''}${u.rank}</span></td>
+                        <td>${actionBtns}</td></tr>`;
+                    }
+                }
+                document.querySelector("#supervisor-roster-table tbody").innerHTML = sTb || "<tr><td colspan='5' style='text-align:center;'>無警員資料</td></tr>";
+                
+                let iadHtml = appData.iad.filter(c=>c.status==="pending").map((c,i)=>`<div style="background:#111; padding:15px; border-left:4px solid #1e40af; margin-bottom:10px;"><div style="color:#60a5fa; font-size:0.8rem;">${c.date}</div><div style="font-weight:bold;">申訴人: ${c.name} ➔ 目標: ${c.target}</div><div style="color:#aaa; font-size:0.9rem; margin:5px 0;">事實: ${c.content}</div><button onclick="openIadAction(${i})" class="btn" style="background:#b45309; padding:5px 10px; font-size:0.8rem;">⚖️ 審理案件</button></div>`).join("");
+                document.getElementById("supervisor-iad-cases").innerHTML = iadHtml || "<p style='color:#888; text-align:center;'>無待審核案件</p>";
+                if(document.getElementById("area-iad-cases")) document.getElementById("area-iad-cases").innerHTML = iadHtml || "<p style='color:#888; text-align:center;'>無待審核案件</p>";
+            }
+            
+            // 系統後台 (Admin Only)
             if(isAdmin) {
-                let aTb = ""; for(let k in appData.users){ let u=appData.users[k]; aTb+=`<tr><td>${k}</td><td>${u.role}</td><td>${u.name}</td><td>${u.dept||'-'}</td><td style="color:${u.status==='approved'?'#4ade80':'#f59e0b'}">${u.status}</td><td>${u.status==='pending'?`<button onclick="approveUser('${k}')" style="background:#166534; color:white; border:none; padding:3px 8px; border-radius:3px; cursor:pointer;">核准</button>`:''}<button onclick="editUser('${k}')" style="background:#f59e0b; border:none; padding:3px 8px; border-radius:3px; cursor:pointer; margin:0 5px;">✏️</button><button onclick="delUser('${k}')" style="background:#991b1b; color:white; border:none; padding:3px 8px; border-radius:3px; cursor:pointer;">🗑️</button></td></tr>`; }
+                let aTb = ""; for(let k in appData.users){ let u=appData.users[k]; aTb+=`<tr><td>${k}</td><td>${u.role}</td><td>${u.name}</td><td>${u.dept||'-'}</td><td style="color:${u.status==='approved'?'#4ade80':(u.status==='suspended'?'#ef4444':'#f59e0b')}">${u.status}</td><td>${u.status==='pending'?`<button onclick="approveUser('${k}')" style="background:#166534; color:white; border:none; padding:3px 8px; border-radius:3px; cursor:pointer;">核准</button>`:''}<button onclick="editUser('${k}')" style="background:#f59e0b; border:none; padding:3px 8px; border-radius:3px; cursor:pointer; margin:0 5px;">✏️</button><button onclick="delUser('${k}')" style="background:#991b1b; color:white; border:none; padding:3px 8px; border-radius:3px; cursor:pointer;">🗑️</button></td></tr>`; }
                 document.querySelector("#admin-users-table tbody").innerHTML = aTb;
                 document.getElementById("audit-log-area").innerHTML = appData.logs.map(l=>`<div>${l}</div>`).join("");
-                document.getElementById("area-iad-cases").innerHTML = appData.iad.filter(c=>c.status==="pending").map((c,i)=>`<div style="background:#111; padding:15px; border-left:4px solid #1e40af; margin-bottom:10px;"><div style="color:#60a5fa; font-size:0.8rem;">${c.date}</div><div style="font-weight:bold;">申訴人: ${c.name} ➔ 目標: ${c.target}</div><div style="color:#aaa; font-size:0.9rem; margin:5px 0;">事實: ${c.content}</div><button onclick="openIadAction(${i})" class="btn" style="background:#b45309; padding:5px 10px; font-size:0.8rem;">⚖️ 審理案件</button></div>`).join("") || "<p style='color:#888; text-align:center;'>無待審核案件</p>";
             }
-            // 法庭與新聞
+            
             document.getElementById("area-court").innerHTML = appData.court.map((c,i)=>`<div class="list-item" style="border-left-color:#b45309;"><div style="display:flex; justify-content:space-between;"><div><div class="item-tag" style="background:rgba(180,83,9,0.2); color:#fbbf24;">裁決書 | ${c.date}</div><div class="item-title">被告：${c.def}</div></div><div>${(isAdmin||role==="judge")?`<button class="btn" style="background:#f59e0b; padding:2px 8px; font-size:0.7rem;" onclick="editCourt(${i})">✏️</button><button class="btn" style="background:#991b1b; padding:2px 8px; font-size:0.7rem;" onclick="delCourt(${i})">🗑️</button>`:""}</div></div><div style="color:#fbbf24; margin-bottom:5px; font-weight:bold;">主文：${c.ver}</div><div class="item-text">見解：${c.reason}</div><div style="text-align:right; font-size:0.8rem; color:#888;">法官: ${c.judge}</div></div>`).join("") || "<p style='color:#888; text-align:center;'>無紀錄</p>";
             document.getElementById("area-news").innerHTML = appData.news.map((n,i)=>`<div class="list-item" style="border-left-color:#60a5fa;"><div style="display:flex; justify-content:space-between;"><div><div class="item-tag" style="background:rgba(96,165,250,0.2); color:#60a5fa;">News | ${n.date}</div><div class="item-title">${n.t}</div></div><div>${(isAdmin||role==="reporter")?`<button class="btn" style="background:#f59e0b; padding:2px 8px; font-size:0.7rem;" onclick="editNews(${i})">✏️</button><button class="btn" style="background:#991b1b; padding:2px 8px; font-size:0.7rem;" onclick="delNews(${i})">🗑️</button>`:""}</div></div><div class="item-text">${n.c}</div><div style="text-align:right; font-size:0.8rem; color:#888;">記者: ${n.auth}</div></div>`).join("") || "<p style='color:#888; text-align:center;'>無新聞</p>";
             applyAuthUI();
         }
 
-        // --- IAD 審理面板 (分級懲處) ---
+        // --- IAD 審理面板 ---
         function openIadAction(i) {
             document.getElementById("iad-case-index").value = i;
             document.getElementById("iad-action-reason").value = "";
-            document.getElementById("iad-action-modal").style.display = "block";
+            UI.openForm('iad-action-modal');
         }
         function submitIadAction() {
             let i = document.getElementById("iad-case-index").value;
             let type = document.getElementById("iad-action-type").value;
             let reason = document.getElementById("iad-action-reason").value;
             if(!reason) return alert("請填寫裁決理由！");
+            
             let c = appData.iad[i]; c.status = "resolved";
             let tUser = Object.keys(appData.users).find(k => appData.users[k].name === c.target || k === c.target); 
             
             let logMsg = "";
             if(type === 'warning') logMsg = `[IAD裁決] 警員 ${c.target} 記申誡一次。理由: ${reason}`;
             else if(type === 'retrain') logMsg = `[IAD裁決] 警員 ${c.target} 強制重新受訓。理由: ${reason}`;
-            else if(type === 'suspend') { if(tUser) appData.users[tUser].status = "pending"; logMsg = `[IAD裁決] 警員 ${c.target} 遭到停職處分。理由: ${reason}`; }
-            else if(type === 'demote') { if(tUser) appData.users[tUser].rank = "降級處分"; logMsg = `[IAD裁決] 警員 ${c.target} 遭到降級處分。理由: ${reason}`; }
-            else if(type === 'fire') { if(tUser) delete appData.users[tUser]; logMsg = `[IAD裁決] 警員 ${c.target} 遭到開除註銷。理由: ${reason}`; }
+            else if(type === 'suspend') { if(tUser) appData.users[tUser].status = "suspended"; logMsg = `[IAD裁決] 警員 ${c.target} 遭到停職處分。理由: ${reason}`; }
+            else if(type === 'demote') { 
+                if(tUser) {
+                    let rIdx = RANK_HIERARCHY.indexOf(appData.users[tUser].rank);
+                    if(rIdx > 0) { appData.users[tUser].rank = RANK_HIERARCHY[rIdx - 1]; logMsg = `[IAD裁決] 警員 ${c.target} 降級處分。理由: ${reason}`; } 
+                    else { appData.users[tUser].status = "suspended"; logMsg = `[IAD裁決] 警員 ${c.target} (警校生) 降級處分轉為停職。理由: ${reason}`; }
+                } 
+            }
+            else if(type === 'fire') { if(tUser) delete appData.users[tUser]; logMsg = `[IAD裁決] 警員 ${c.target} 開除註銷。理由: ${reason}`; }
             else if(type === 'dismiss') logMsg = `[IAD裁決] 駁回對 ${c.target} 的指控。理由: ${reason}`;
 
             sysLog(logMsg); alert("✅ 裁決已生效並寫入全域日誌！");
-            closeForm('iad-action-modal'); renderAll(); saveToCloud();
+            UI.closeAllForms(); renderAll(); saveToCloud();
         }
 
+        // --- 使用者編輯 ---
         function editUser(u) {
             edUid = u; let acc = appData.users[u];
-            document.getElementById("edit-name").value = acc.name; document.getElementById("edit-role").value = acc.role; document.getElementById("edit-dept").value = acc.dept||"LAPD"; document.getElementById("edit-badge").value = acc.badge||""; document.getElementById("edit-rank").value = acc.rank||""; document.getElementById("edit-status").value = acc.status; document.getElementById("edit-user-modal").style.display="block";
+            document.getElementById("edit-name").value = acc.name; document.getElementById("edit-role").value = acc.role; document.getElementById("edit-dept").value = acc.dept||"LAPD"; document.getElementById("edit-badge").value = acc.badge||""; document.getElementById("edit-rank").value = acc.rank||""; document.getElementById("edit-status").value = acc.status; 
+            UI.openForm('edit-user-modal');
         }
         function submitEditUser() {
             let btn = document.getElementById("btn-edit-user"); btn.innerText = "儲存中..."; btn.disabled = true;
             let acc = appData.users[edUid];
             acc.name = document.getElementById("edit-name").value; acc.role = document.getElementById("edit-role").value; acc.dept = document.getElementById("edit-dept").value; acc.badge = document.getElementById("edit-badge").value; acc.rank = document.getElementById("edit-rank").value; acc.status = document.getElementById("edit-status").value;
-            sysLog(`編輯帳號: ${edUid}`); closeForm("edit-user-modal"); renderAll(); saveToCloud().finally(() => { btn.innerText = "💾 儲存修改"; btn.disabled = false; });
+            sysLog(`編輯帳號: ${edUid}`); 
+            UI.closeAllForms(); renderAll(); 
+            saveToCloud().finally(() => { btn.innerText = "💾 儲存修改"; btn.disabled = false; });
         }
         function approveUser(u) { appData.users[u].status="approved"; sysLog(`核准: ${u}`); renderAll(); saveToCloud(); }
         function delUser(u) { if(!confirm("刪除帳號?")) return; delete appData.users[u]; sysLog(`刪除帳號: ${u}`); renderAll(); saveToCloud(); }
 
-        // --- 發布表單 ---
-        function openAnnForm() { editAnnIdx=-1; document.getElementById("post-title").value=""; document.getElementById("post-text").value=""; document.getElementById("ann-form-title").innerText="📢 發布公告"; document.getElementById("btn-ann-submit").innerText="🚀 確認發佈"; toggleForm('admin-announcement-form'); }
+        // --- 發布表單 (全綁定 UI.closeAllForms) ---
         function submitAnnounce() {
             let t=document.getElementById("post-tag").value, h=document.getElementById("post-title").value, c=document.getElementById("post-text").value; if(!h||!c) return alert("未填完整");
             let btn=document.getElementById("btn-ann-submit"); btn.disabled=true; btn.innerText="處理中...";
             if(editAnnIdx>-1){ appData.announcements[editAnnIdx]={tag:t,title:h,text:c}; sysLog("編輯公告:"+h); editAnnIdx=-1; } else { appData.announcements.unshift({tag:t,title:h,text:c}); sysLog("發布公告:"+h); }
-            closeForm('admin-announcement-form'); renderAll(); saveToCloud().finally(()=>{btn.disabled=false; btn.innerText="🚀 確認發佈"; document.getElementById("post-title").value=""; document.getElementById("post-text").value="";});
+            UI.closeAllForms(); renderAll(); 
+            saveToCloud().finally(()=>{btn.disabled=false; btn.innerText="🚀 確認發佈"; document.getElementById("post-title").value=""; document.getElementById("post-text").value="";});
         }
-        function editAnn(i) { editAnnIdx=i; let a=appData.announcements[i]; document.getElementById("post-tag").value=a.tag; document.getElementById("post-title").value=a.title; document.getElementById("post-text").value=a.text; document.getElementById("ann-form-title").innerText="✏️ 編輯公告"; document.getElementById("admin-announcement-form").style.display="block"; document.getElementById("btn-ann-submit").innerText="💾 儲存修改"; window.scrollTo(0, document.getElementById("admin-announcement-form").offsetTop-100); }
+        function editAnn(i) { editAnnIdx=i; let a=appData.announcements[i]; document.getElementById("post-tag").value=a.tag; document.getElementById("post-title").value=a.title; document.getElementById("post-text").value=a.text; document.getElementById("ann-form-title").innerText="✏️ 編輯公告"; document.getElementById("btn-ann-submit").innerText="💾 儲存修改"; UI.openForm('admin-announcement-form'); window.scrollTo(0, 0); }
         function delAnn(i) { if(confirm("刪除?")){ sysLog("刪除公告"); appData.announcements.splice(i,1); renderAll(); saveToCloud(); } }
 
-        function openBoloForm() { editBoloIdx=-1; document.getElementById("bolo-title").value=""; document.getElementById("bolo-form-title").innerText="🚨 建立通緝令"; document.getElementById("btn-bolo-submit").innerText="🚨 發布通緝"; toggleForm('bolo-form-container'); }
         function submitBolo() { 
             let h=document.getElementById("bolo-title").value; if(!h) return alert("請填標題"); let btn=document.getElementById("btn-bolo-submit"); btn.disabled=true; btn.innerText="處理中...";
             let obj={title:h, level:document.getElementById("bolo-level").value, target:document.getElementById("bolo-target").value, plate:document.getElementById("bolo-plate").value, law:document.getElementById("bolo-law").value, desc:document.getElementById("bolo-desc").value, action:document.getElementById("bolo-action").value, imgUrl:document.getElementById("bolo-img").value||"https://images.unsplash.com/photo-1555864326-5bc22fa6f8cb?w=600", officer:currentUser};
             if(editBoloIdx>-1){ appData.bolos[editBoloIdx]=obj; sysLog("編輯BOLO"); editBoloIdx=-1; } else { appData.bolos.unshift(obj); sysLog("發布BOLO"); }
-            closeForm('bolo-form-container'); renderAll(); saveToCloud().finally(()=>{btn.disabled=false; btn.innerText="🚨 發布通緝";});
+            UI.closeAllForms(); renderAll(); saveToCloud().finally(()=>{btn.disabled=false; btn.innerText="🚨 發布通緝";});
         }
-        function editBolo(i) { editBoloIdx=i; let b=appData.bolos[i]; document.getElementById("bolo-title").value=b.title; document.getElementById("bolo-level").value=b.level; document.getElementById("bolo-target").value=b.target; document.getElementById("bolo-plate").value=b.plate; document.getElementById("bolo-law").value=b.law; document.getElementById("bolo-desc").value=b.desc; document.getElementById("bolo-action").value=b.action; document.getElementById("bolo-img").value=b.imgUrl; document.getElementById("bolo-form-title").innerText="✏️ 編輯通緝令"; document.getElementById("bolo-form-container").style.display="block"; document.getElementById("btn-bolo-submit").innerText="💾 儲存修改"; window.scrollTo(0, document.getElementById("bolo-form-container").offsetTop-100); }
+        function editBolo(i) { editBoloIdx=i; let b=appData.bolos[i]; document.getElementById("bolo-title").value=b.title; document.getElementById("bolo-level").value=b.level; document.getElementById("bolo-target").value=b.target; document.getElementById("bolo-plate").value=b.plate; document.getElementById("bolo-law").value=b.law; document.getElementById("bolo-desc").value=b.desc; document.getElementById("bolo-action").value=b.action; document.getElementById("bolo-img").value=b.imgUrl; document.getElementById("bolo-form-title").innerText="✏️ 編輯通緝令"; document.getElementById("btn-bolo-submit").innerText="💾 儲存修改"; UI.openForm('bolo-form-container'); window.scrollTo(0, 0); }
         function delBolo(i) { if(confirm("撤銷?")){ sysLog("撤銷通緝"); appData.bolos.splice(i,1); renderAll(); saveToCloud(); } }
 
-        function openCourtForm() { editCourtIdx=-1; document.getElementById("court-defendant").value=""; document.getElementById("court-form-title").innerText="⚖️ 新增法庭判決"; document.getElementById("btn-court-submit").innerText="敲槌判決"; toggleForm('court-form'); }
         function submitCourt() { 
             let d=document.getElementById("court-defendant").value, v=document.getElementById("court-verdict").value, r=document.getElementById("court-reason").value; if(!d||!v) return alert("必填"); let btn=document.getElementById("btn-court-submit"); btn.disabled=true; btn.innerText="處理中...";
             let obj={def:d, ver:v, reason:r, judge:currentUser, date:new Date().toLocaleDateString()};
             if(editCourtIdx>-1){ appData.court[editCourtIdx]=obj; sysLog("編輯判決"); editCourtIdx=-1; } else { appData.court.unshift(obj); sysLog("發布判決"); }
-            closeForm('court-form'); renderAll(); saveToCloud().finally(()=>{btn.disabled=false; btn.innerText="敲槌判決";});
+            UI.closeAllForms(); renderAll(); saveToCloud().finally(()=>{btn.disabled=false; btn.innerText="敲槌判決";});
         }
-        function editCourt(i) { editCourtIdx=i; let c=appData.court[i]; document.getElementById("court-defendant").value=c.def; document.getElementById("court-verdict").value=c.ver; document.getElementById("court-reason").value=c.reason; document.getElementById("court-form-title").innerText="✏️ 編輯判決"; document.getElementById("court-form").style.display="block"; document.getElementById("btn-court-submit").innerText="💾 儲存修改"; window.scrollTo(0, document.getElementById("court-form").offsetTop-100); }
+        function editCourt(i) { editCourtIdx=i; let c=appData.court[i]; document.getElementById("court-defendant").value=c.def; document.getElementById("court-verdict").value=c.ver; document.getElementById("court-reason").value=c.reason; document.getElementById("court-form-title").innerText="✏️ 編輯判決"; document.getElementById("btn-court-submit").innerText="💾 儲存修改"; UI.openForm('court-form'); window.scrollTo(0, 0); }
         function delCourt(i) { if(confirm("刪除?")){ sysLog("刪除判決"); appData.court.splice(i,1); renderAll(); saveToCloud(); } }
 
-        function openNewsForm() { editNewsIdx=-1; document.getElementById("news-title").value=""; document.getElementById("news-form-title").innerText="📰 發布新聞"; document.getElementById("btn-news-submit").innerText="發佈上網"; toggleForm('news-form'); }
         function submitNews() { 
             let t=document.getElementById("news-title").value, c=document.getElementById("news-text").value; if(!t||!c) return alert("必填"); let btn=document.getElementById("btn-news-submit"); btn.disabled=true; btn.innerText="處理中...";
             let obj={t:t, c:c, auth:currentUser, date:new Date().toLocaleDateString()};
             if(editNewsIdx>-1){ appData.news[editNewsIdx]=obj; sysLog("編輯新聞"); editNewsIdx=-1; } else { appData.news.unshift(obj); sysLog("發布新聞"); }
-            closeForm('news-form'); renderAll(); saveToCloud().finally(()=>{btn.disabled=false; btn.innerText="發佈上網";});
+            UI.closeAllForms(); renderAll(); saveToCloud().finally(()=>{btn.disabled=false; btn.innerText="發佈上網";});
         }
-        function editNews(i) { editNewsIdx=i; let n=appData.news[i]; document.getElementById("news-title").value=n.t; document.getElementById("news-text").value=n.c; document.getElementById("news-form-title").innerText="✏️ 編輯新聞"; document.getElementById("news-form").style.display="block"; document.getElementById("btn-news-submit").innerText="💾 儲存修改"; window.scrollTo(0, document.getElementById("news-form").offsetTop-100); }
+        function editNews(i) { editNewsIdx=i; let n=appData.news[i]; document.getElementById("news-title").value=n.t; document.getElementById("news-text").value=n.c; document.getElementById("news-form-title").innerText="✏️ 編輯新聞"; document.getElementById("btn-news-submit").innerText="💾 儲存修改"; UI.openForm('news-form'); window.scrollTo(0, 0); }
         function delNews(i) { if(confirm("刪除?")){ sysLog("刪除新聞"); appData.news.splice(i,1); renderAll(); saveToCloud(); } }
-
-        function clockIn() { let btn=document.getElementById("btn-clock-in"); btn.disabled=true; if(!appData.roster.includes(currentUser)){ appData.roster.push(currentUser); sysLog("10-8 打卡上線"); renderAll(); saveToCloud().finally(()=>btn.disabled=false); } else btn.disabled=false; }
-        function clockOut() { let btn=document.getElementById("btn-clock-out"); btn.disabled=true; let i=appData.roster.indexOf(currentUser); if(i>-1){ appData.roster.splice(i,1); sysLog("10-7 打卡下線"); renderAll(); saveToCloud().finally(()=>btn.disabled=false); } else btn.disabled=false; }
 
         function initLaws() {
             let catHTML = {1:"", 2:"", 3:"", 4:"", 5:"", 6:"", 7:"", 8:"", 9:""};
@@ -886,7 +1050,36 @@
         function clearCalculator() { document.querySelectorAll(".add-btn.selected").forEach(b=>{b.classList.remove("selected"); b.innerText="➕ 計算";}); sf=0; sj=0; sl=[]; document.getElementById("total-fine").innerText="$ 0"; document.getElementById("total-jail").innerText="0 個月"; document.getElementById("total-bail").innerText="$ 0"; }
         function copyCalcResult() { if(!sl.length) return alert("請勾選法條"); navigator.clipboard.writeText(`【裁決處罰公文】\n引用法條：${sl.join("、")}\n罰款：$${sf} | 刑期：${sj}個月 | 保釋金：$${sf*0.1}`).then(()=>alert("複製成功")); }
 
-        function submitTip() { let btn = document.getElementById("btn-tip-submit"); btn.disabled = true; btn.innerText = "傳送中..."; fetch(ANONYMOUS_TIP_WEBHOOK_URL, {method:"POST", headers:{"Content-Type":"application/json"}, body:JSON.stringify({content:"**[新匿名情報]**", embeds:[{title:"檢舉詳情", color:16119819, fields:[{name:"地點",value:document.getElementById("tip-loc").value||"無"},{name:"特徵",value:document.getElementById("tip-sus").value||"無"},{name:"內容",value:document.getElementById("tip-txt").value||"無"}]}]})}).then(()=>{ alert("送出成功"); btn.disabled=false; btn.innerText="🔒 加密送出情報"; document.getElementById("tip-loc").value=""; document.getElementById("tip-sus").value=""; document.getElementById("tip-txt").value=""; }); }
+        // --- 全新市民情報存入資料庫 ---
+        function submitTip() { 
+            let type = document.getElementById("tip-type").value;
+            let loc = document.getElementById("tip-loc").value;
+            let sus = document.getElementById("tip-sus").value;
+            let txt = document.getElementById("tip-txt").value;
+            
+            if(!txt) return alert("請至少填寫情報詳情！");
+            
+            let btn = document.getElementById("btn-tip-submit"); 
+            btn.disabled = true; btn.innerText = "傳送中..."; 
+            
+            // 寫入資料庫
+            let obj = { type: type, loc: loc||"未提供", sus: sus||"未提供", txt: txt, date: new Date().toLocaleString() };
+            appData.tips.unshift(obj);
+            
+            // 傳送 Webhook
+            fetch(ANONYMOUS_TIP_WEBHOOK_URL, {
+                method:"POST", headers:{"Content-Type":"application/json"}, 
+                body:JSON.stringify({content:"**[新匿名情報已輸入系統]**", embeds:[{title:"情報明細", color:16119819, fields:[{name:"類型",value:type},{name:"地點",value:loc||"無"},{name:"特徵",value:sus||"無"},{name:"內容",value:txt}]}]})
+            }).then(() => { 
+                renderAll();
+                saveToCloud().then(()=>{
+                    alert("✅ 情報已加密傳送至警網內部！"); 
+                    btn.disabled=false; btn.innerText="🔒 加密送出情報"; 
+                    document.getElementById("tip-loc").value=""; document.getElementById("tip-sus").value=""; document.getElementById("tip-txt").value=""; 
+                });
+            }); 
+        }
+
         function submitIAD() { let n = document.getElementById("iad-name").value, t = document.getElementById("iad-target").value, c = document.getElementById("iad-content").value; if(!t || !c) return alert("必填！"); let btn = document.getElementById("btn-iad-submit"); btn.disabled = true; btn.innerText = "傳送中..."; appData.iad.unshift({name: n||"匿名市民", target: t, content: c, status: "pending", date: new Date().toLocaleString()}); renderAll(); saveToCloud().then(()=>{ alert("已傳送至督察組後台"); btn.disabled=false; btn.innerText="🔒 提交至督察組後台"; document.getElementById("iad-name").value=""; document.getElementById("iad-target").value=""; document.getElementById("iad-content").value=""; }); }
         function readMirandaTTS() { let msg=new SpeechSynthesisUtterance("你有權保持緘默。你所說的一切都將在法庭上作為指控你的不利證據。你有權請律師。"); msg.lang="zh-TW"; window.speechSynthesis.speak(msg); }
         function startQuiz() { if(!document.getElementById("quiz-name").value) return alert("請輸入姓名"); document.getElementById("quiz-start-area").style.display="none"; document.getElementById("quiz-questions-area").style.display="block"; }
